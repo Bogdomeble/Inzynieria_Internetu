@@ -1,0 +1,25 @@
+{
+  "name": "projekt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KISiM-AGH/projekt-zaliczeniowy-ii-2025-_w_sensie_ze_tutaj_mam_nazwe_wpisac.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KISiM-AGH/projekt-zaliczeniowy-ii-2025-_w_sensie_ze_tutaj_mam_nazwe_wpisac/issues"
+  },
+  "homepage": "https://github.com/KISiM-AGH/projekt-zaliczeniowy-ii-2025-_w_sensie_ze_tutaj_mam_nazwe_wpisac#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "tsc": "^2.0.4",
+    "vite": "^7.1.12"
+  }
+}
