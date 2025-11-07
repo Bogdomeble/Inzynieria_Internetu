@@ -38,3 +38,7 @@ packages/react-devtools-fusebox/dist
 packages/react-devtools-inline/dist
 packages/react-devtools-shell/dist
 packages/react-devtools-timeline/dist
+server/.env
+notes/image.png
+notes/image_2.png
+notes/image_3.png
