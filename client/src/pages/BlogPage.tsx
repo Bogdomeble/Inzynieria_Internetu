@@ -73,7 +73,7 @@ export function BlogPage() {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-white">
             Error loading posts
           </h2>
           <p className="mt-2 text-gray-600">
@@ -91,8 +91,8 @@ export function BlogPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Page Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">Blog</h1>
-        <p className="mt-2 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-white sm:text-4xl">Blog</h1>
+        <p className="mt-2 text-lg text-white">
           Latest thoughts, ideas, and stories
         </p>
       </header>
@@ -100,7 +100,7 @@ export function BlogPage() {
       {/* Featured Post */}
       {featuredPost && (
         <section className="mb-12">
-          <h2 className="mb-6 text-2xl font-bold text-gray-900">
+          <h2 className="mb-6 text-2xl font-bold text-white">
             Featured Post
           </h2>
           <PostCard post={featuredPost} variant="featured" />
@@ -109,7 +109,7 @@ export function BlogPage() {
 
       {/* Regular Posts */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold text-gray-900">Latest Posts</h2>
+        <h2 className="mb-6 text-2xl font-bold text-white">Latest Posts</h2>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {regularPosts?.map((post) => (
             <PostCard key={post.id} post={post} />

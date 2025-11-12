@@ -23,23 +23,26 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background">
           {/* Navigation */}
-          <nav className="bg-white shadow">
+          <nav className="bg-background shadow">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <div className="flex h-16 justify-between">
                 <div className="flex">
+
                   <Link
                     to="/"
-                    className="flex items-center text-xl font-bold text-gray-900"
+                    className="flex items-center text-xl font-bold text-primary-foreground"
                   >
+
                     Blog App
                   </Link>
+
                 </div>
                 <div className="flex items-center space-x-4">
                   <Link
                     to="/create"
-                    className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                    className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-text hover:bg-primary-700"
                   >
                     Create Post
                   </Link>
@@ -57,15 +60,15 @@ function App() {
                 element={
                   <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
                     <div className="text-center">
-                      <h2 className="text-2xl font-bold text-gray-900">
+                      <h2 className="text-2xl font-bold text-primary-foreground">
                         404 - Page Not Found
                       </h2>
-                      <p className="mt-2 text-gray-600">
+                      <p className="mt-2 text-text">
                         The page you're looking for doesn't exist.
                       </p>
                       <Link
                         to="/"
-                        className="mt-4 inline-block rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                        className="mt-4 inline-block rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-text hover:bg-primary-700"
                       >
                         Go Home
                       </Link>
@@ -77,9 +80,9 @@ function App() {
           </main>
 
           {/* Footer */}
-          <footer className="mt-12 border-t bg-white">
+          <footer className="mt-12 border-t bg-background">
             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-              <p className="text-center text-sm text-gray-500">
+              <p className="text-center text-sm text-text">
                 © {new Date().getFullYear()} Blog App. All rights reserved.
               </p>
             </div>

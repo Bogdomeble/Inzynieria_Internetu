@@ -4,6 +4,10 @@ export default {
   theme: {
     extend: {
       colors: {
+          text:{
+              DEFAULT: "rgb(var(--text) / <alpha-value>)",
+              muted: "rgb(var(--text-muted) / <alpha-value>)",
+          },
         primary: {
           DEFAULT: "rgb(var(--primary) / <alpha-value>)",
           foreground: "rgb(var(--primary-foreground) / <alpha-value>)",
