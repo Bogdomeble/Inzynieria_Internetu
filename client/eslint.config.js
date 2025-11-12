@@ -41,7 +41,7 @@ export default defineConfig([
             },
             parser: tseslint.parser,
             parserOptions: {
-                project: './tsconfig.json',
+                project: ['./tsconfig.app.json', './tsconfig.node.json'],
                 tsconfigRootDir: import.meta.dirname,
             },
         },
