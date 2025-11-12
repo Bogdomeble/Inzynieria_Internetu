@@ -74,5 +74,5 @@
 
 /* Selection */
 ::selection {
-    @apply bg-primary/20 text-foreground;
+    @apply bg-primary-foreground text-background;
 }
