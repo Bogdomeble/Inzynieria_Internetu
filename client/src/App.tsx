@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { BlogPage } from "./pages/BlogPage";
-
+import {PostDetailPage} from "./pages/PostDetailPage";
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,29 +53,30 @@ function App() {
 
           {/* Main Content */}
           <main className="container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/" element={<BlogPage />} />
-              <Route
-                path="*"
-                element={
-                  <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-bold text-primary-foreground">
-                        404 - Page Not Found
-                      </h2>
-                      <p className="mt-2 text-text">
-                        The page you're looking for doesn't exist.
-                      </p>
-                      <Link
-                        to="/"
-                        className="mt-4 inline-block rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-text hover:bg-primary-700"
-                      >
-                        Go Home
-                      </Link>
-                    </div>
-                  </div>
-                }
-              />
+              <Routes>
+                  <Route path="/" element={<BlogPage />} />
+                  <Route path="/posts/:slug" element={<PostDetailPage />} />
+                  <Route
+                      path="*"
+                      element={
+                          <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
+                              <div className="text-center">
+                                  <h2 className="text-2xl font-bold text-primary-foreground">
+                                      404 - Page Not Found
+                                  </h2>
+                                  <p className="mt-2 text-text">
+                                      The page you're looking for doesn't exist.
+                                  </p>
+                                  <Link
+                                      to="/"
+                                      className="mt-4 inline-block rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-text hover:bg-primary-700"
+                                  >
+                                      Go Home
+                                  </Link>
+                              </div>
+                          </div>
+                      }
+                  />
             </Routes>
           </main>
 
