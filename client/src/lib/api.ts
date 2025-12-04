@@ -1,3 +1,4 @@
+// client/src/lib/api.ts
 import type {
   Post,
   CreatePost,

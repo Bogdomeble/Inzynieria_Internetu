@@ -1,3 +1,4 @@
+// client/src/components/UserAvatar.tsx
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { useMemo } from "react";

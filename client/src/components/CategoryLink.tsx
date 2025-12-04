@@ -1,3 +1,4 @@
+// client/src/components/CategoryLink.tsx
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { categoriesApi } from "../lib/api";

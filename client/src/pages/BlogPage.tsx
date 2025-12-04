@@ -1,3 +1,4 @@
+// client/src/pages/BlogPage.tsx
 import { useQuery } from "@tanstack/react-query";
 import type { Post } from "../lib/schemas";
 import { PostCard } from "../components/PostCard";
