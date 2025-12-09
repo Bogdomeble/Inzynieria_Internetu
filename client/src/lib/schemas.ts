@@ -1,4 +1,3 @@
-// client/src/lib/schemas.ts
 import { z } from "zod";
 
 // Base schema for timestamps

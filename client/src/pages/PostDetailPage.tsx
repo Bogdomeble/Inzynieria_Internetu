@@ -1,58 +1,58 @@
-// client/src/pages/PostDetailPage.tsx
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import type { Post } from "../lib/schemas";
 import { formatDate } from "../lib/utils";
+import { postsApi } from "../lib/api"; // Import API
 
-// Mock data - matches your MOCK_POSTS structure
-const MOCK_POSTS: Post[] = [
-    {
-        id: "1",
-        title: "Getting Started with TypeScript",
-        slug: "getting-started-with-typescript",
-        content: `
-bla bla 
-    `,
-        excerpt: "Learn the basics of TypeScript and how to use it in your projects",
-        published: true,
-        authorId: "author1",
-        categoryId: "cat1",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        featuredImage: "https://picsum.photos/800/400",
-    },
-    {
-        id: "2",
-        title: "React Best Practices",
-        slug: "react-best-practices",
-        content: `
-jakies tam inne bla bla
-    `,
-        excerpt: "Discover the best practices for building scalable React applications",
-        published: true,
-        authorId: "author2",
-        categoryId: "cat2",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        featuredImage: "https://picsum.photos/800/400?random=1",
-    },
-    {
-        id: "3",
-        title: "State Management with React Query",
-        slug: "state-management-react-query",
-        content: `
-jeszcze inne bla bla
-    `,
-        excerpt: "Learn how to manage server state effectively with React Query",
-        published: true,
-        authorId: "author1",
-        categoryId: "cat3",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        featuredImage: "https://picsum.photos/800/400?random=2",
-    },
-];
+// Mock data - matches MOCK_POSTS structure
+// const MOCK_POSTS: Post[] = [
+//     {
+//         id: "1",
+//         title: "Getting Started with TypeScript",
+//         slug: "getting-started-with-typescript",
+//         content: `
+// bla bla
+//     `,
+//         excerpt: "Learn the basics of TypeScript and how to use it in your projects",
+//         published: true,
+//         authorId: "author1",
+//         categoryId: "cat1",
+//         createdAt: new Date().toISOString(),
+//         updatedAt: new Date().toISOString(),
+//         featuredImage: "https://picsum.photos/800/400",
+//     },
+//     {
+//         id: "2",
+//         title: "React Best Practices",
+//         slug: "react-best-practices",
+//         content: `
+// jakies tam inne bla bla
+//     `,
+//         excerpt: "Discover the best practices for building scalable React applications",
+//         published: true,
+//         authorId: "author2",
+//         categoryId: "cat2",
+//         createdAt: new Date().toISOString(),
+//         updatedAt: new Date().toISOString(),
+//         featuredImage: "https://picsum.photos/800/400?random=1",
+//     },
+//     {
+//         id: "3",
+//         title: "State Management with React Query",
+//         slug: "state-management-react-query",
+//         content: `
+// jeszcze inne bla bla
+//     `,
+//         excerpt: "Learn how to manage server state effectively with React Query",
+//         published: true,
+//         authorId: "author1",
+//         categoryId: "cat3",
+//         createdAt: new Date().toISOString(),
+//         updatedAt: new Date().toISOString(),
+//         featuredImage: "https://picsum.photos/800/400?random=2",
+//     },
+// ];
 
 interface Comment {
     id: string;
@@ -63,42 +63,42 @@ interface Comment {
 }
 
 
-const MOCK_COMMENTS: Record<string, Comment[]> = {
-    "1": [
-        {
-            id: "c1",
-            author: "k",
-            content: "67",
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            likes: 5,
-        },
-        {
-            id: "c2",
-            author: "Smith",
-            content: "nice",
-            createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-            likes: 12,
-        },
-    ],
-    "2": [
-        {
-            id: "c3",
-            author: "Польский поляк",
-            content: "To nie nasza wojna",
-            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-            likes: 8,
-        },
-    ],
-    "3": [
-        {
-            id: "c4",
-            author: "XD User",
-            content: "niesamowite",
-            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-            likes: 15,
-        },
-    ],
-};
+// const MOCK_COMMENTS: Record<string, Comment[]> = {
+//     "1": [
+//         {
+//             id: "c1",
+//             author: "k",
+//             content: "67",
+//             createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+//             likes: 5,
+//         },
+//         {
+//             id: "c2",
+//             author: "Smith",
+//             content: "nice",
+//             createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+//             likes: 12,
+//         },
+//     ],
+//     "2": [
+//         {
+//             id: "c3",
+//             author: "Польский поляк",
+//             content: "To nie nasza wojna",
+//             createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+//             likes: 8,
+//         },
+//     ],
+//     "3": [
+//         {
+//             id: "c4",
+//             author: "XD User",
+//             content: "niesamowite",
+//             createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+//             likes: 15,
+//         },
+//     ],
+// };
 
 export function PostDetailPage() {
     const { slug } = useParams<{ slug: string }>();
@@ -106,14 +106,13 @@ export function PostDetailPage() {
     const [comments, setComments] = useState<Comment[]>([]);
     const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
 
-    // Fetch data
-    const { data: post, isLoading, error } = useQuery<Post | undefined>({
-        queryKey: ["post", slug],
-        queryFn: () => {
-            const foundPost = MOCK_POSTS.find((p) => p.slug === slug);
-            return Promise.resolve(foundPost);
-        },
-    });
+// Fetch real post data
+  const { data: post, isLoading, error } = useQuery<Post>({
+    queryKey: ["post", slug],
+    queryFn: () => postsApi.getBySlug(slug!),
+    enabled: !!slug,
+    retry: 1,
+  });
 
     // Load comments
     const { data: initialComments } = useQuery<Comment[]>({

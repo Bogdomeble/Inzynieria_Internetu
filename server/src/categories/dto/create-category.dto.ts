@@ -1,2 +1,5 @@
-// server/src/categories/dto/create-category.dto.ts
-export class CreateCategoryDto {}
+export class CreateCategoryDto {
+  name: string;
+  slug: string;
+  description?: string;
+}

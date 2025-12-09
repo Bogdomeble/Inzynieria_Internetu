@@ -1,4 +1,3 @@
-// server/src/posts/posts.controller.ts
 import {
   Controller,
   Get,

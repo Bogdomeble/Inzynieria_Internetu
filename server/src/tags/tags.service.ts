@@ -1,4 +1,3 @@
-// server/src/tags/tags.service.ts
 import { Injectable } from '@nestjs/common';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';

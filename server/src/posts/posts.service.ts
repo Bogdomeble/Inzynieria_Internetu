@@ -2,58 +2,54 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { PrismaService } from '../prisma.service';
 
 @Injectable()
 export class PostsService {
-  // Mock database
-  private posts = [
-    {
-      id: '1',
-      title: 'NestJS is Awesome',
-      slug: 'nestjs-is-awesome',
-      content: 'Content here...',
-      excerpt: 'Learn about NestJS',
-      published: true,
-      authorId: 'author1',
-      categoryId: 'cat1',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      featuredImage: 'https://picsum.photos/800/400',
-    },
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.posts;
+  async create(createPostDto: CreatePostDto) {
+    return this.prisma.post.create({
+      data: createPostDto,
+    });
   }
 
-  findOne(id: string) {
-    return this.posts.find((post) => post.id === id);
+  async findAll() {
+    return this.prisma.post.findMany({
+      include: {
+        category: true,
+        author: {
+          select: { id: true, username: true, email: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
   }
 
-  findBySlug(slug: string) {
-    return this.posts.find((post) => post.slug === slug);
+  async findBySlug(slug: string) {
+    return this.prisma.post.findUnique({
+      where: { slug },
+      include: {
+        category: true,
+        author: {
+          select: { id: true, username: true }
+        }
+      }
+    });
   }
 
-  create(createPostDto: CreatePostDto) {
-    const newPost = {
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      published: false,
-      authorId: 'temp-author',
-      categoryId: 'temp-cat',
-      ...createPostDto,
-    };
-    // @ts-ignore - simplistic mock type handling
-    this.posts.push(newPost);
-    return newPost;
+  async findOne(id: string) {
+    return this.prisma.post.findUnique({ where: { id } });
   }
 
-  update(id: string, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(id: string, updatePostDto: UpdatePostDto) {
+    return this.prisma.post.update({
+      where: { id },
+      data: updatePostDto,
+    });
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} post`;
+  async remove(id: string) {
+    return this.prisma.post.delete({ where: { id } });
   }
 }

@@ -1,4 +1,3 @@
-// client/src/components/PostCard.tsx
 import { Link } from "react-router-dom";
 import type { Post } from "../lib/schemas";
 import { formatDate } from "../lib/utils";

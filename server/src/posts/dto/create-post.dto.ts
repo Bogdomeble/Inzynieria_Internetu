@@ -1,2 +1,10 @@
-// server/src/posts/dto/create-post.dto.ts
-export class CreatePostDto {}
+export class CreatePostDto {
+  title: string;
+  content: string;
+  slug: string;
+  excerpt?: string;
+  published?: boolean;
+  featuredImage?: string;
+  authorId: string;
+  categoryId: string;
+}

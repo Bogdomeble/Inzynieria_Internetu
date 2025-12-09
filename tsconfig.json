@@ -1,9 +1,12 @@
 {
   "compilerOptions": {
+    "target": "es2016",
+    "module": "commonjs",
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "NodeNext",
-    "allowSyntheticDefaultImports": true
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist"
   },
-  "include": ["eslint.config.mts"]
+  "include": ["src"]
 }

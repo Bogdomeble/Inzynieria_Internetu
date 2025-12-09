@@ -1,4 +1,3 @@
--- server/prisma/migrations/20251203132453_add_password_field/migration.sql
 /*
   Warnings:
 

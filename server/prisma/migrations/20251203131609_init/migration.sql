@@ -1,4 +1,3 @@
--- server/prisma/migrations/20251203131609_init/migration.sql
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL PRIMARY KEY,
