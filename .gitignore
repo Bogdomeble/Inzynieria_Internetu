@@ -54,6 +54,8 @@ pids
 *.pid.lock
 
 *.js
+!*config.js
+project_code.txt
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
