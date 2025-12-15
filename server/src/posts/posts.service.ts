@@ -1,16 +1,30 @@
-// server/src/posts/posts.service.ts
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma.service';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createPostDto: CreatePostDto) {
+    const { tags, ...postData } = createPostDto;
+
     return this.prisma.post.create({
-      data: createPostDto,
+      data: {
+        ...postData,
+        tags: tags
+          ? {
+              connect: tags.map((tagId) => ({ id: tagId })),
+            }
+          : undefined,
+      },
+      include: {
+        tags: true,
+        category: true,
+        author: { select: { id: true, username: true, email: true } },
+      },
     });
   }
 
@@ -18,38 +32,71 @@ export class PostsService {
     return this.prisma.post.findMany({
       include: {
         category: true,
+        tags: true,
         author: {
-          select: { id: true, username: true, email: true }
-        }
+          select: { id: true, username: true, email: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
   async findBySlug(slug: string) {
-    return this.prisma.post.findUnique({
+    const post = await this.prisma.post.findUnique({
       where: { slug },
       include: {
         category: true,
         author: {
-          select: { id: true, username: true }
-        }
-      }
+          select: { id: true, username: true },
+        },
+      },
     });
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${slug} not found`);
+    }
+    return post;
   }
 
   async findOne(id: string) {
-    return this.prisma.post.findUnique({ where: { id } });
+    const post = await this.prisma.post.findUnique({
+      where: { id },
+      include: {
+        tags: true,
+        category: true,
+        author: { select: { id: true, username: true } },
+      },
+    });
+
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+
+    return post;
   }
 
   async update(id: string, updatePostDto: UpdatePostDto) {
+    const { tags, ...postData } = updatePostDto;
+
+    await this.findOne(id);
+
     return this.prisma.post.update({
       where: { id },
-      data: updatePostDto,
+      data: {
+        ...postData,
+        ...(tags
+          ? {
+              tags: {
+                set: tags.map((tagId) => ({ id: tagId })),
+              },
+            }
+          : {}),
+      },
+      include: { tags: true },
     });
   }
 
   async remove(id: string) {
+    await this.findOne(id);
     return this.prisma.post.delete({ where: { id } });
   }
 }

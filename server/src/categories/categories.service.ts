@@ -1,5 +1,4 @@
-// server/src/categories/categories.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from '../prisma.service';
@@ -16,20 +15,25 @@ export class CategoriesService {
     return this.prisma.category.findMany();
   }
 
-  findOne(id: number) {
-    return `Not implemented for ID conversion yet`;
+  // Zmieniamy number na string (UUID)
+  async findOne(id: string) {
+    const category = await this.prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    return category;
   }
 
-  // Metoda pomocnicza dla kontrolera, jeśli ID jest stringiem
-  async findOneById(id: string) {
-    return this.prisma.category.findUnique({ where: { id } });
+  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    await this.findOne(id);
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.category.delete({ where: { id } });
   }
 }
