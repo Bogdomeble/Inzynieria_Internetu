@@ -99,4 +99,16 @@ export class PostsService {
     await this.findOne(id);
     return this.prisma.post.delete({ where: { id } });
   }
+
+  async getComments(postId: string) {
+    return this.prisma.comment.findMany({
+      where: { postId },
+      include: {
+        user: {
+          select: { username: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' }, // Najnowsze na górze
+    });
+  }
 }

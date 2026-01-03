@@ -1,9 +1,11 @@
-import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import type { Post } from "../lib/schemas";
-import { formatDate } from "../lib/utils";
-import { postsApi } from "../lib/api"; // Import API
+// client/src/pages/PostDetailPage.tsx
+import { useParams, Link } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import type { Post, Comment } from '../lib/schemas';
+import { formatDate } from '../lib/utils';
+import { postsApi, commentsApi } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 // Mock data - matches MOCK_POSTS structure
 // const MOCK_POSTS: Post[] = [
@@ -54,15 +56,6 @@ import { postsApi } from "../lib/api"; // Import API
 //     },
 // ];
 
-interface Comment {
-    id: string;
-    author: string;
-    content: string;
-    createdAt: string;
-    likes: number;
-}
-
-
 // const MOCK_COMMENTS: Record<string, Comment[]> = {
 //     "1": [
 //         {
@@ -100,74 +93,66 @@ interface Comment {
 //     ],
 // };
 
+interface Comment {
+    id: string;
+    author: string;
+    content: string;
+    createdAt: string;
+    likes: number;
+}
 export function PostDetailPage() {
     const { slug } = useParams<{ slug: string }>();
-    const [newComment, setNewComment] = useState("");
-    const [comments, setComments] = useState<Comment[]>([]);
-    const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+    const [newComment, setNewComment] = useState('');
+    const { user } = useAuth(); // Pobieramy zalogowanego użytkownika
+    const queryClient = useQueryClient(); // Do odświeżania danych
 
-// Fetch real post data
-  const { data: post, isLoading, error } = useQuery<Post>({
-    queryKey: ["post", slug],
-    queryFn: () => postsApi.getBySlug(slug!),
-    enabled: !!slug,
-    retry: 1,
-  });
+    // Pobierz post
+    const {
+        data: post,
+        isLoading,
+        error,
+    } = useQuery<Post>({
+        queryKey: ['post', slug],
+        queryFn: () => postsApi.getBySlug(slug!),
+        enabled: !!slug,
+        retry: 1,
+    });
 
-    // Load comments
-    const { data: initialComments } = useQuery<Comment[]>({
-        queryKey: ["comments", post?.id],
+    // Pobierz komentarze z API (już nie z MOCK_DATA)
+    const { data: comments = [] } = useQuery<Comment[]>({
+        queryKey: ['comments', post?.id],
         queryFn: () => {
             if (!post) return Promise.resolve([]);
-            return Promise.resolve(MOCK_COMMENTS[post.id] || []);
+            return commentsApi.getByPostId(post.id);
         },
         enabled: !!post,
     });
 
-    // Set comments
-    if (initialComments && comments.length === 0) {
-        setComments(initialComments);
-    }
+    // Mutacja do dodawania komentarza
+    const createCommentMutation = useMutation({
+        mutationFn: commentsApi.create,
+        onSuccess: () => {
+            // Po sukcesie wyczyść pole i odśwież listę komentarzy
+            setNewComment('');
+            queryClient.invalidateQueries({ queryKey: ['comments', post?.id] });
+        },
+        onError: (err) => {
+            alert('Failed to add comment: ' + err);
+        },
+    });
 
     const handleSubmitComment = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newComment.trim()) return;
+        if (!newComment.trim() || !post || !user) return;
 
-        const comment: Comment = {
-            id: `c${Date.now()}`,
-            author: "Anonymous User",
+        createCommentMutation.mutate({
             content: newComment,
-            createdAt: new Date().toISOString(),
-            likes: 0,
-        };
-
-        setComments([...comments, comment]);
-        setNewComment("");
+            postId: post.id,
+            userId: user.id, // ID zalogowanego użytkownika
+        });
     };
 
-    const handleLikeComment = (commentId: string) => {
-        if (likedComments.has(commentId)) {
-            // Unlike
-            setLikedComments((prev) => {
-                const newSet = new Set(prev);
-                newSet.delete(commentId);
-                return newSet;
-            });
-            setComments((prev) =>
-                prev.map((c) =>
-                    c.id === commentId ? { ...c, likes: c.likes - 1 } : c
-                )
-            );
-        } else {
-            // Like
-            setLikedComments((prev) => new Set(prev).add(commentId));
-            setComments((prev) =>
-                prev.map((c) =>
-                    c.id === commentId ? { ...c, likes: c.likes + 1 } : c
-                )
-            );
-        }
-    };
+    // (Lajkowanie na razie pomijamy)
 
     if (isLoading) {
         return (
@@ -184,13 +169,12 @@ export function PostDetailPage() {
         return (
             <div className="flex h-96 items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold text-text">Post not found</h2>
-                    <p className="mt-2 text-text-muted">
-                        The post you're looking for doesn't exist.
-                    </p>
+                    <h2 className="text-2xl font-bold text-text">
+                        Post not found
+                    </h2>
                     <Link
                         to="/"
-                        className="mt-4 inline-block rounded-md bg-accent px-4 py-2 text-sm font-medium text-background hover:opacity-90"
+                        className="mt-4 inline-block rounded-md bg-accent px-4 py-2 text-sm font-medium text-background"
                     >
                         Back to Blog
                     </Link>
@@ -201,28 +185,13 @@ export function PostDetailPage() {
 
     return (
         <div className="mx-auto max-w-4xl px-4 py-8">
-            {/* Back Button */}
             <Link
                 to="/"
                 className="mb-6 inline-flex items-center text-accent hover:text-accent-foreground transition-colors"
             >
-                <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 19l-7-7 7-7"
-                    />
-                </svg>
-                Back to Blog
+                ← Back to Blog
             </Link>
 
-            {/* Featured Image */}
             {post.featuredImage && (
                 <div className="mb-8 overflow-hidden rounded-lg">
                     <img
@@ -233,55 +202,61 @@ export function PostDetailPage() {
                 </div>
             )}
 
-            {/* Post Header */}
             <header className="mb-8">
-                <h1 className="mb-4 text-4xl font-bold text-text">{post.title}</h1>
-
+                <h1 className="mb-4 text-4xl font-bold text-text">
+                    {post.title}
+                </h1>
                 <div className="flex items-center gap-4 text-sm text-text-muted">
-          <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-background">
-            {post.categoryId}
-          </span>
-                    <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-                    <span>By Author {post.authorId.slice(0, 4)}</span>
+                    <time dateTime={post.createdAt}>
+                        {formatDate(post.createdAt)}
+                    </time>
+                    <span>By Author {post.author.username.slice(0, 4)}</span>
                 </div>
             </header>
 
-            {/* Post Content */}
-            <article className="prose prose-invert max-w-none">
+            <article className="prose prose-invert max-w-none mb-12">
                 <div className="whitespace-pre-wrap text-text leading-relaxed">
                     {post.content}
                 </div>
             </article>
 
-            {/* Comments Section */}
             <section className="mt-12 border-t border-secondary pt-8">
                 <h2 className="mb-6 text-2xl font-bold text-text">
                     Comments ({comments.length})
                 </h2>
 
-                {/* Comment Form */}
-                <form onSubmit={handleSubmitComment} className="mb-8">
-          <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Write a comment..."
-              className="w-full rounded-lg border border-secondary bg-primary p-4 text-text placeholder-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent"
-              rows={4}
-          />
-                    <button
-                        type="submit"
-                        className="mt-2 rounded-md bg-primary-foreground px-6 py-2 text-sm font-medium text-background hover:opacity-90 transition-opacity"
-                    >
-                        Post Comment
-                    </button>
-                </form>
+                {user ? (
+                    <form onSubmit={handleSubmitComment} className="mb-8">
+                        <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            placeholder="Write a comment..."
+                            className="w-full rounded-lg border border-secondary bg-primary p-4 text-text placeholder-text-muted focus:border-accent focus:outline-none"
+                            rows={3}
+                        />
+                        <button
+                            type="submit"
+                            disabled={createCommentMutation.isPending}
+                            className="mt-2 rounded-md bg-accent px-6 py-2 text-sm font-medium text-background hover:opacity-90 disabled:opacity-50"
+                        >
+                            {createCommentMutation.isPending
+                                ? 'Posting...'
+                                : 'Post Comment'}
+                        </button>
+                    </form>
+                ) : (
+                    <p className="mb-8 text-text-muted">
+                        Please{' '}
+                        <Link to="/login" className="text-accent underline">
+                            login
+                        </Link>{' '}
+                        to write a comment.
+                    </p>
+                )}
 
-                {/* Comments List */}
                 <div className="space-y-6">
                     {comments.length === 0 ? (
-                        <p className="text-text-muted">
-                            No comments yet. Be the first to comment!
-                        </p>
+                        <p className="text-text-muted">No comments yet.</p>
                     ) : (
                         comments.map((comment) => (
                             <div
@@ -289,39 +264,16 @@ export function PostDetailPage() {
                                 className="rounded-lg bg-card p-6 border border-secondary"
                             >
                                 <div className="mb-2 flex items-center justify-between">
-                  <span className="font-semibold text-text">
-                    {comment.author}
-                  </span>
+                                    {/* Tu backend zwraca nested user object, jeśli tak ustawiłeś w API */}
+                                    <span className="font-semibold text-text">
+                                        {(comment as any).user?.username ||
+                                            'User'}
+                                    </span>
                                     <time className="text-sm text-text-muted">
                                         {formatDate(comment.createdAt)}
                                     </time>
                                 </div>
-                                <p className="text-text mb-4">{comment.content}</p>
-
-                                {/* Like Button */}
-                                <button
-                                    onClick={() => handleLikeComment(comment.id)}
-                                    className={`flex items-center gap-2 text-sm transition-colors ${
-                                        likedComments.has(comment.id)
-                                            ? "texta-ccent"
-                                            : "text-text-muted hover:text-accent"
-                                    }`}
-                                >
-                                    <svg
-                                        className="h-5 w-5"
-                                        fill={likedComments.has(comment.id) ? "currentColor" : "none"}
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                        />
-                                    </svg>
-                                    <span className="font-medium">{comment.likes}</span>
-                                </button>
+                                <p className="text-text">{comment.content}</p>
                             </div>
                         ))
                     )}

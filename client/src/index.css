@@ -1,31 +1,39 @@
+/* client/src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
     :root {
+        /* Kolory podstawowe (Ciemny brąz/fiolet) */
         --primary: 51 40 44;
         --primary-foreground: 207 172 183;
 
+        /* Tło (Bardzo ciemne) */
         --background: 13 8 10;
-        --foreground: 0 0 0;
+        --foreground: 246 239 241; /* Jasny tekst domyślnie */
 
-        --card: 29 3 3;
-        --card-foreground: 145 16 16;
+        /* Karty */
+        --card: 22 14 15; /* Rozjaśniamy lekko tło kart */
+        --card-foreground: 246 239 241;
 
-        --secondary: 22 14 15;
-        --secondary-foreground: 102 70 59;
+        /* Elementy drugoplanowe */
+        --secondary: 40 30 35; /* Jaśniejszy od tła, żeby było widać różnicę */
+        --secondary-foreground: 207 172 183;
 
-        --muted: 210 40% 96.1%; /* not implemented */
-        --muted-foreground: 215.4 16.3% 46.9%; /* not implemented */
+        --muted: 22 14 15;
+        --muted-foreground: 156 163 175;
 
+        /* Akcent (Złoty) */
         --accent: 178 152 122;
-        --accent-foreground: 178 152 122;
+        --accent-foreground: 13 8 10; /* Ciemny tekst na złotym tle dla kontrastu */
 
         --text: 246 239 241;
         --text-muted: 156 163 175;
 
-
+        /* Błędy */
+        --destructive: 127 29 29;
+        --destructive-foreground: 254 226 226;
     }
 
     body {
@@ -38,41 +46,47 @@
         @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
     }
 
+    /* Ulepszone style przycisków */
     .btn {
-        @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors
-    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
-    disabled:pointer-events-none disabled:opacity-50;
+        @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-bold transition-all
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background
+        disabled:pointer-events-none disabled:opacity-50 active:scale-95;
     }
 
+    /* Przycisk Główny (Złoty z ciemnym tekstem) */
     .btn-primary {
-        @apply bg-primary text-primary-foreground hover:bg-primary/90;
+        @apply bg-accent text-accent-foreground hover:bg-accent/90 shadow-md;
+    }
+
+    /* Globalne style dla inputów i textarea */
+    input,
+    textarea,
+    select {
+        @apply bg-secondary/50 border border-secondary-foreground/30 text-text rounded-md px-3 py-2
+        focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none transition-colors;
+    }
+
+    /* Poprawa widoczności placeholderów */
+    input::placeholder,
+    textarea::placeholder {
+        @apply text-text-muted/70;
     }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
-    @apply bg-secondary;
+    @apply bg-background;
 }
 
 ::-webkit-scrollbar-thumb {
-    @apply bg-primary/50 rounded-full;
+    @apply bg-secondary border-2 border-background rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary;
-}
-
-/* Focus styles */
-:focus {
-    @apply outline-none ring-2 ring-primary ring-offset-2;
-}
-
-/* Selection */
-::selection {
-    @apply bg-primary-foreground text-background;
+    @apply bg-accent/70;
 }

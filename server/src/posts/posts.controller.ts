@@ -35,6 +35,11 @@ export class PostsController {
     return this.postsService.findBySlug(slug);
   }
 
+  @Get(':id/comments')
+  getComments(@Param('id') id: string) {
+    return this.postsService.getComments(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.postsService.findOne(id);
