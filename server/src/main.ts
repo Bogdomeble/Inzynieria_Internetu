@@ -7,7 +7,9 @@ async function bootstrap() {
 
   // Enable CORS
   app.enableCors({
-    origin: 'http://localhost:5173', // Vite client URL
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  
+  // Vite client URL
     credentials: true,
   });
 
