@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -28,8 +29,30 @@ export class PostsService {
     });
   }
 
-  async findAll() {
+  async findAll(query?: { search?: string; tag?: string }) {
+    const { search, tag } = query || {};
+
+    const where: any = {
+      published: true, // tylko opublikowane na liście (dobra praktyka)
+    };
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search } }, 
+        { content: { contains: search } },
+      ];
+    }
+
+    if (tag) {
+      where.tags = {
+        some: {
+          slug: tag, // Filtrujemy posty, które mają conajmniej 1 tag o danym slugu
+        },
+      };
+    }
+
     return this.prisma.post.findMany({
+      where, // Przekazujemy dynamiczny warunek
       include: {
         category: true,
         tags: true,

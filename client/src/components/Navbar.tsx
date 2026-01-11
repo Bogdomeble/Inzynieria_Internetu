@@ -14,7 +14,7 @@ export function Navbar() {
                             to="/"
                             className="flex items-center text-xl font-bold text-primary-foreground hover:opacity-80 transition-opacity"
                         >
-                            Blog App
+                            MiniBlog
                         </Link>
                     </div>
 

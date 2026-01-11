@@ -2,7 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import type { Post } from "../lib/schemas";
 import { PostCard } from "../components/PostCard";
 import { postsApi } from "../lib/api";
-// Mock data for testing
+import { useSearchParams } from "react-router-dom"; 
+import { SearchBar } from "../components/SearchBar"; 
+
+// dane do testowania
 // const MOCK_POSTS: Post[] = [
 //   {
 //     id: "1",
@@ -48,14 +51,28 @@ import { postsApi } from "../lib/api";
 // ];
 
 export function BlogPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // wartości z URL
+  const search = searchParams.get("search") || undefined;
+  const tag = searchParams.get("tag") || undefined;
+
   const {
     data: posts,
     isLoading,
     error,
   } = useQuery<Post[]>({
-    queryKey: ["posts"],
-    queryFn: postsApi.getAll,
+    // musi zawierać zmienne, żeby React Query odświeżył dane przy zmianie
+    queryKey: ["posts", search, tag],
+    queryFn: () => postsApi.getAll({ search, tag }),
   });
+
+    const clearTag = () => {
+    setSearchParams(prev => {
+        prev.delete("tag");
+        return prev;
+    });
+  };
 
   if (isLoading) {
     return (
@@ -87,40 +104,37 @@ export function BlogPage() {
   const featuredPost = safePosts[0];
   const regularPosts = safePosts.slice(1);
 
-  return (
+return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Page Header */}
       <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white sm:text-4xl">Blog</h1>
-        <p className="mt-2 text-lg text-white">
-          Latest thoughts, ideas, and stories
-        </p>
+        <h1 className="text-3xl font-bold text-white sm:text-4xl mb-4">Home</h1>
+        
+        {/* Pasek wyszukiwania */}
+        <SearchBar />
+
+        {/* Informacja o filtrze tagu */}
+        {tag && (
+            <div className="flex items-center gap-2 mb-4">
+                <span className="text-text-muted">Filtering by tag:</span>
+                <span className="bg-accent text-background px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                    #{tag}
+                    <button onClick={clearTag} className="hover:text-red-700">✕</button>
+                </span>
+            </div>
+        )}
       </header>
 
-      {/* Featured Post */}
-      {featuredPost && (
-        <section className="mb-12">
-          <h2 className="mb-6 text-2xl font-bold text-white">
-            Featured Post
-          </h2>
-          <PostCard post={featuredPost} variant="featured" />
-        </section>
-      )}
-
-      {/* Regular Posts */}
       <section>
-        <h2 className="mb-6 text-2xl font-bold text-white">Latest Posts</h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {regularPosts?.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
+        {posts?.length === 0 ? (
+            <p className="text-center text-text-muted py-10">No posts found matching your criteria.</p>
+        ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {posts?.map((post) => (
+                <PostCard key={post.id} post={post} />
+            ))}
+            </div>
+        )}
       </section>
-
-      {/* Load More Button */}
-      <div className="mt-12 text-center">
-        <button className="btn btn-primary px-8 py-3">Load More Posts</button>
-      </div>
     </div>
   );
 }

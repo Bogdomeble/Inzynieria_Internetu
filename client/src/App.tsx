@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+//import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Dodano Link z powrotem dla strony 404
 
 // Import kontekstu i komponentów
@@ -85,7 +85,7 @@ function App() {
                         <footer className="mt-12 border-t bg-background">
                             <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                                 <p className="text-center text-sm text-text">
-                                    © {new Date().getFullYear()} Blog App. All
+                                    © {new Date().getFullYear()} MiniBlog. All
                                     rights reserved.
                                 </p>
                             </div>
@@ -93,7 +93,6 @@ function App() {
                     </div>
                 </Router>
             </AuthProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
     );
 }

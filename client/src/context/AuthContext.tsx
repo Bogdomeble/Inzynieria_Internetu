@@ -38,13 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const storedToken = localStorage.getItem('token');
             if (storedToken) {
                 try {
-                    // Opcjonalnie: Tutaj moglibyśmy pobrać pełne dane użytkownika z backendu
-                    // np. const userData = await authApi.getProfile();
-                    // setUser(userData);
-
-                    // Na razie odczytamy z localStorage jeśli tam zapisaliśmy usera,
-                    // albo dekodujemy token (JWT). Dla uproszczenia załóżmy,
-                    // że przy loginie zapisujemy też usera w localStorage.
                     const storedUser = localStorage.getItem('user');
                     if (storedUser) {
                         setUser(JSON.parse(storedUser));

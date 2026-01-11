@@ -8,6 +8,7 @@ import {
   Put,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -24,9 +25,9 @@ export class PostsController {
     return this.postsService.create(createPostDto);
   }
 
-  @Get()
-  findAll() {
-    return this.postsService.findAll();
+@Get() // Może zepsuć testy na postmanie
+  findAll(@Query('search') search?: string, @Query('tag') tag?: string) {
+    return this.postsService.findAll({ search, tag });
   }
 
   // Matches client api.getBySlug

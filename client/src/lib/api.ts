@@ -27,10 +27,11 @@ api.interceptors.request.use((config) => {
 
 // Posts API
 export const postsApi = {
-    getAll: async (): Promise<Post[]> => {
-        const { data } = await api.get('/posts');
-        return data;
-    },
+    // może zepsuć testy postmana
+  getAll: async (params?: { search?: string; tag?: string }): Promise<Post[]> => {
+    const { data } = await api.get("/posts", { params });
+    return data;
+  },
 
     getById: async (id: string): Promise<Post> => {
         const { data } = await api.get(`/posts/${id}`);
