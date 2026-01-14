@@ -16,7 +16,7 @@ export function LoginPage() {
 
         try {
             const data = await authApi.login({ email, password });
-            login(data.access_token, data.user);
+            login( data.user);
             navigate('/'); // Przekieruj na stronę główną po zalogowaniu
         } catch (err: any) {
             setError('Invalid email or password');

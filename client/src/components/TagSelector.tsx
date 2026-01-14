@@ -1,4 +1,3 @@
-// client/src/components/TagSelector.tsx
 import { useQuery } from "@tanstack/react-query";
 import { tagsApi } from "../lib/api";
 
@@ -35,7 +34,8 @@ export function TagSelector({ selectedTags, onChange }: TagSelectorProps) {
         const isSelected = selectedTags.includes(tag.id);
         return (
           <button
-            type="button" // nie może być tutaj formularz - troche dziwne rozwiązanie
+            type="button"
+            key = {tag.id} // nie może być tutaj formularz - troche dziwne rozwiązanie
             onClick={() => toggleTag(tag.id)}
             className={`
               px-3 py-1 rounded-full text-sm font-medium transition-all border

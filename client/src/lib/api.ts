@@ -14,16 +14,18 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
 
-// Add request interceptor to include auth token
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+// już nie potrzebne bo używamy ciasteczek
+
+// api.interceptors.request.use((config) => {
+//     const token = localStorage.getItem('token');
+//     if (token) {
+//         config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+// });
 
 // Posts API
 export const postsApi = {
@@ -117,8 +119,11 @@ export const authApi = {
     },
 
     getProfile: async () => {
-        const { data } = await api.get('/auth/profile');
+        const { data } = await api.get('/auth/profile'); // zostawiamy aby można było pobierać usera przy odświeżeniu
         return data;
+    },
+        logout: async () => {
+        await api.post('/auth/logout');
     },
 };
 

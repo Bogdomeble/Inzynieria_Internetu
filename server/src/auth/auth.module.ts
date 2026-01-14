@@ -5,17 +5,23 @@ import { PrismaService } from '../prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config'; 
 
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      secret: 'TAJNY_KLUCZ_ZMIEN_MNIE_W_PRODUKCJI', // przenieś do .env w przyszłości
-      signOptions: { expiresIn: '60m' },
+    // Używamy registerAsync zamiast register
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'), // .env tutaj
+        signOptions: { expiresIn: '1d' },
+      }),
     }),
   ],
   controllers: [AuthController],
   providers: [AuthService, PrismaService, JwtStrategy],
-  exports: [AuthService], // Eksportujemy, jeśli inne moduły potrzebują
+  exports: [AuthService],
 })
 export class AuthModule {}

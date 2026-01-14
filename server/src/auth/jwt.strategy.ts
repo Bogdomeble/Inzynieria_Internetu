@@ -1,14 +1,21 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
+import { Request } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor() {
+  constructor(private configService: ConfigService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // Własna funkcja ekstraktora
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.access_token; // Nazwa musi pasować do tej w AuthController
+        },
+      ]),
       ignoreExpiration: false,
-      secretOrKey: 'TAJNY_KLUCZ_ZMIEN_MNIE_W_PRODUKCJI', // process.env.JWT_SECRET
+      secretOrKey: configService.get<string>('JWT_SECRET') || 'AWARYJNY_KLUCZ_JWT_1111',
     });
   }
 

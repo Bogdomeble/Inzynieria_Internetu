@@ -1,9 +1,9 @@
-import {
+import  {
     createContext,
     useContext,
     useState,
     useEffect,
-    ReactNode,
+    type ReactNode,
 } from 'react';
 import { authApi } from '../lib/api';
 
@@ -12,12 +12,12 @@ interface User {
     username: string;
     email?: string;
     role: string;
+    userId?: string;
 }
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
-    login: (token: string, user: User) => void;
+    login: ( user: User) => void; // token juz nie jest tutaj potrzebny
     logout: () => void;
     isAuthenticated: boolean;
     isLoading: boolean;
@@ -27,61 +27,78 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setToken] = useState<string | null>(
-        localStorage.getItem('token'),
-    );
     const [isLoading, setIsLoading] = useState(true);
 
     // Przy starcie aplikacji sprawdź token
     useEffect(() => {
-        const initAuth = async () => {
-            const storedToken = localStorage.getItem('token');
-            if (storedToken) {
-                try {
-                    const storedUser = localStorage.getItem('user');
-                    if (storedUser) {
-                        setUser(JSON.parse(storedUser));
-                    }
-                } catch (error) {
-                    console.error('Auth init error', error);
-                    logout();
-                }
-            }
-            setIsLoading(false);
+const checkAuth = async () => {
+      try {
+        // Próba pobrania profilu. 
+        // Jeśli ciasteczko HttpOnly istnieje i jest poprawne, dostaniemy usera.
+        const userData = await authApi.getProfile();
+        
+        // Mapowanie danych jeśli backend zwraca userId zamiast id (zależy od strategii)
+        const normalizedUser = {
+            ...userData,
+            id: userData.id || userData.userId 
         };
+        
+        setUser(normalizedUser);
+      } catch (error) {
+        // Jeśli błąd (401 Unauthorized), znaczy że nie jesteśmy zalogowani
+        // lub token wygasł. Czyścimy usera.
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-        initAuth();
+        checkAuth();
     }, []);
 
-    const login = (newToken: string, newUser: User) => {
-        localStorage.setItem('token', newToken);
+const login = (newUser: User) => {
+        // Nie zapisujemy już tokena
         localStorage.setItem('user', JSON.stringify(newUser));
-        setToken(newToken);
         setUser(newUser);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-    };
+    const logout = async () => {
+        try {
+            await authApi.logout(); // Wywołujemy backend, żeby usunął ciasteczko
+        } catch (error) {
+            console.error('Logout failed', error);
+                        setUser(null);
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                token,
-                login,
-                logout,
-                isAuthenticated: !!user,
-                isLoading,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+        } finally {
+            // Czyścimy stan frontendu niezależnie od wyniku backendu
+            // dodatkowo czyscimy dane query
+        window.location.reload();
+        }
+    }
+
+return (
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
+      {isLoading ? (
+          // ZMIANA: Dodano style inline, aby upewnić się, że tekst będzie widoczny
+          <div style={{ 
+              height: '100vh', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              backgroundColor: '#0d080a', 
+              color: 'white',
+              fontSize: '1.5rem'
+          }}>
+              Loading session...
+          </div>
+      ) : (
+          children
+      )}
+    </AuthContext.Provider>
+  );
 }
+
+
 
 export function useAuth() {
     const context = useContext(AuthContext);

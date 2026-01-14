@@ -37,17 +37,17 @@ describe('Authentication System (e2e)', () => {
     password: 'password123',
   };
 
-  it('/auth/register (POST) - should register a new user', () => {
+it('/auth/register (POST) - should register a new user', () => {
     return request(app.getHttpServer())
       .post('/auth/register')
       .send(testUser)
       .expect(201)
       .expect((res) => {
-        // Sprawdzamy czy otrzymaliśmy token i obiekt user
-        expect(res.body).toHaveProperty('access_token');
-        expect(res.body).toHaveProperty('user');
-        expect(res.body.user).toHaveProperty('id');
-        expect(res.body.user.email).toEqual(testUser.email);
+      expect(res.body).toHaveProperty('user');
+      // expect(res.body).toHaveProperty('access_token');
+        // Opcjonalnie sprawdź czy ciastko zostało ustawione:
+      expect(res.headers['set-cookie']).toBeDefined(); 
+      expect(res.body.user.email).toEqual(testUser.email);
       });
   });
 
@@ -58,13 +58,13 @@ describe('Authentication System (e2e)', () => {
       .expect(409); // Conflict
   });
 
-  it('/auth/login (POST) - should login and return JWT', () => {
+  it('/auth/login (POST) - should login (using cookies now)', () => {
     return request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: testUser.email, password: testUser.password })
       .expect(200)
       .expect((res) => {
-        expect(res.body).toHaveProperty('access_token');
+        // expect(res.body).toHaveProperty('access_token');
         expect(res.body.user.email).toEqual(testUser.email);
       });
   });
