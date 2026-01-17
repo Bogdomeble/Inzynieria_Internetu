@@ -7,9 +7,8 @@ import { SearchBar } from "../components/SearchBar";
 import { TagFilter } from "../components/TagFilter";
 
 export function BlogPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
-    // Wartości z URL
     const search = searchParams.get("search") || undefined;
     const tag = searchParams.get("tag") || undefined;
 
@@ -17,37 +16,19 @@ export function BlogPage() {
         data: posts,
         isLoading,
         error,
+        isError
     } = useQuery<Post[]>({
-        // React Query odświeży dane, gdy zmieni się 'search' lub 'tag'
         queryKey: ["posts", search, tag],
         queryFn: () => postsApi.getAll({ search, tag }),
     });
 
-    if (isLoading) {
-        return (
-            <div className="flex h-96 items-center justify-center">
-                <div className="text-center">
-                    <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-secondary border-t-accent"></div>
-                    <p className="mt-4 text-text-muted">Loading posts...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="flex h-96 items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-2xl font-bold text-text">
-                        Error loading posts
-                    </h2>
-                    <p className="mt-2 text-text-muted">
-                        {error instanceof Error ? error.message : "Please try again later"}
-                    </p>
-                </div>
-            </div>
-        );
-    }
+    const clearTag = () => {
+        setSearchParams(prev => {
+            const newParams = new URLSearchParams(prev);
+            newParams.delete("tag");
+            return newParams;
+        });
+    };
 
     return (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -57,19 +38,46 @@ export function BlogPage() {
                     <p className="text-text-muted">Discover stories, thinking, and expertise.</p>
                 </div>
 
-                {/* Pasek wyszukiwania */}
                 <SearchBar />
 
-                {/* Pasek filtrów tagów */}
                 <TagFilter />
+
+                {tag && (
+                    <div className="flex items-center gap-2 mb-4 justify-center">
+                        <span className="text-text-muted text-sm">Active filter:</span>
+                        <span className="bg-accent text-background px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                    #{tag}
+                            <button onClick={clearTag} className="hover:text-red-700">✕</button>
+                </span>
+                    </div>
+                )}
             </header>
 
             <section>
-                {posts?.length === 0 ? (
+
+                {isLoading ? (
+                    <div className="flex h-64 items-center justify-center">
+                        <div className="text-center">
+                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-secondary border-t-accent"></div>
+                            <p className="mt-4 text-text-muted">Searching...</p>
+                        </div>
+                    </div>
+                ) : isError ? (
+                    <div className="flex h-64 items-center justify-center">
+                        <div className="text-center">
+                            <h2 className="text-2xl font-bold text-red-500">
+                                Error loading posts
+                            </h2>
+                            <p className="mt-2 text-text-muted">
+                                {error instanceof Error ? error.message : "Please try again later"}
+                            </p>
+                        </div>
+                    </div>
+                ) : posts?.length === 0 ? (
                     <div className="text-center py-16">
                         <p className="text-xl text-text mb-2">No posts found.</p>
                         <p className="text-text-muted">
-                            Try adjusting your search or filter to find what you're looking for.
+                            Try adjusting your search or filter.
                         </p>
                     </div>
                 ) : (
