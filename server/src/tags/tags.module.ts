@@ -4,6 +4,6 @@ import { TagsController } from './tags.controller';
 import { PrismaService } from '../prisma.service';
 @Module({
   controllers: [TagsController],
-  providers: [TagsService,PrismaService],
+  providers: [TagsService, PrismaService],
 })
 export class TagsModule {}

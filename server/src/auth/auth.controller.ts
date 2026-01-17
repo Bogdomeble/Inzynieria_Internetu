@@ -1,9 +1,20 @@
-import { Body, Controller, Post, HttpCode, HttpStatus, Res, Req, Get, UseGuards } from '@nestjs/common';
-import type { Response } from 'express'; // <--- WAŻNE: Import z express
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  Res,
+  Req,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { JwtAuthGuard } from './jwt-auth.guard'; //
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -13,16 +24,16 @@ export class AuthController {
   @Post('login')
   async signIn(
     @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) response: Response //Wstrzykujemy Response
+    @Res({ passthrough: true }) response: Response,
   ) {
     const { access_token, user } = await this.authService.login(loginDto);
 
     // Ustawiamy ciasteczko
     response.cookie('access_token', access_token, {
-      httpOnly: true,                 // JS nie ma dostępu 
-      secure: false,                  // Na localhost: false.
-      sameSite: 'lax',                // może być 'strict'
-      maxAge: 1000 * 60 * 60 * 24,    // 1 dzień (w milisekundach)
+      httpOnly: true, // JS nie ma dostępu
+      secure: false, // Na localhost: false.
+      sameSite: 'lax', // może być 'strict'
+      maxAge: 1000 * 60 * 60 * 24, // 1 dzień (w milisekundach)
     });
 
     return { user }; // Zwracamy tylko usera, token jest już w ciasteczku
@@ -31,7 +42,7 @@ export class AuthController {
   @Post('register')
   async signUp(
     @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) response: Response
+    @Res({ passthrough: true }) response: Response,
   ) {
     const { access_token, user } = await this.authService.register(registerDto);
 
@@ -46,19 +57,19 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Res({ passthrough: true }) response: Response) {
-    // Czyścimy ciasteczko ustawiając pustą treść i datę w przeszłości
+  logout(@Res({ passthrough: true }) response: Response) {
+    // Czyścimy ciasteczko
 
     response.cookie('access_token', '', {
       httpOnly: true,
       expires: new Date(0),
     });
-    
+
     return { message: 'Logged out success' };
   }
-   @UseGuards(JwtAuthGuard) // <--- Chroniony endpoint, wymaga ciasteczka
+  @UseGuards(JwtAuthGuard) // Chroniony endpoint, wymaga ciasteczka
   @Get('profile')
-  getProfile(@Req() req) {
+  getProfile(@Req() req: { user: User }) {
     // req.user jest ustawiany przez JwtStrategy po pomyślnej weryfikacji tokena
     return req.user;
   }

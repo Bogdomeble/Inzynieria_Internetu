@@ -2,139 +2,94 @@ import { useQuery } from "@tanstack/react-query";
 import type { Post } from "../lib/schemas";
 import { PostCard } from "../components/PostCard";
 import { postsApi } from "../lib/api";
-import { useSearchParams } from "react-router-dom"; 
-import { SearchBar } from "../components/SearchBar"; 
-
-// dane do testowania
-// const MOCK_POSTS: Post[] = [
-//   {
-//     id: "1",
-//     title: "Getting Started with TypeScript",
-//     slug: "getting-started-with-typescript",
-//     content: "TypeScript is a powerful superset of JavaScript...",
-//     excerpt:
-//       "Learn the basics of TypeScript and how to use it in your projects",
-//     published: true,
-//     authorId: "author1",
-//     categoryId: "cat1",
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//     featuredImage: "https://picsum.photos/800/400",
-//   },
-//   {
-//     id: "2",
-//     title: "React Best Practices",
-//     slug: "react-best-practices",
-//     content: "When building React applications...",
-//     excerpt:
-//       "Discover the best practices for building scalable React applications",
-//     published: true,
-//     authorId: "author2",
-//     categoryId: "cat2",
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//     featuredImage: "https://picsum.photos/800/400?random=1",
-//   },
-//   {
-//     id: "3",
-//     title: "State Management with React Query",
-//     slug: "state-management-react-query",
-//     content: "React Query is a powerful library...",
-//     excerpt: "Learn how to manage server state effectively with React Query",
-//     published: true,
-//     authorId: "author1",
-//     categoryId: "cat3",
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//     featuredImage: "https://picsum.photos/800/400?random=2",
-//   },
-// ];
+import { useSearchParams } from "react-router-dom";
+import { SearchBar } from "../components/SearchBar";
+import { TagFilter } from "../components/TagFilter";
 
 export function BlogPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  
-  // wartości z URL
-  const search = searchParams.get("search") || undefined;
-  const tag = searchParams.get("tag") || undefined;
+    const [searchParams, setSearchParams] = useSearchParams();
 
-  const {
-    data: posts,
-    isLoading,
-    error,
-  } = useQuery<Post[]>({
-    // musi zawierać zmienne, żeby React Query odświeżył dane przy zmianie
-    queryKey: ["posts", search, tag],
-    queryFn: () => postsApi.getAll({ search, tag }),
-  });
+    const search = searchParams.get("search") || undefined;
+    const tag = searchParams.get("tag") || undefined;
+
+    const {
+        data: posts,
+        isLoading,
+        error,
+        isError
+    } = useQuery<Post[]>({
+        queryKey: ["posts", search, tag],
+        queryFn: () => postsApi.getAll({ search, tag }),
+    });
 
     const clearTag = () => {
-    setSearchParams(prev => {
-        prev.delete("tag");
-        return prev;
-    });
-  };
+        setSearchParams(prev => {
+            const newParams = new URLSearchParams(prev);
+            newParams.delete("tag");
+            return newParams;
+        });
+    };
 
-  if (isLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-primary"></div>
-          <p className="mt-4 text-gray-600">Loading posts...</p>
-        </div>
-      </div>
-    );
-  }
+        <div className="mx-auto w-full max-w-[1600px] px-6 py-10 lg:px-8">
+            <header className="mb-12 mt-4">
+                <div className="text-center mb-10">
+                    <h1 className="text-4xl font-extrabold text-text sm:text-6xl mb-4 tracking-tight">
+                        MiniBlog
+                    </h1>
+                    <p className="text-lg text-text-muted max-w-2xl mx-auto">
+                        Discover stories, thinking, and expertise from writers on any topic.
+                    </p>
+                </div>
 
-  if (error) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white">
-            Error loading posts
-          </h2>
-          <p className="mt-2 text-gray-600">
-            {error instanceof Error ? error.message : "Please try again later"}
-          </p>
-        </div>
-      </div>
-    );
-  }
+                <SearchBar />
+                <TagFilter />
 
-  const safePosts = posts || [];
-  const featuredPost = safePosts[0];
-  const regularPosts = safePosts.slice(1);
-
-return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold text-white sm:text-4xl mb-4">Home</h1>
-        
-        {/* Pasek wyszukiwania */}
-        <SearchBar />
-
-        {/* Informacja o filtrze tagu */}
-        {tag && (
-            <div className="flex items-center gap-2 mb-4">
-                <span className="text-text-muted">Filtering by tag:</span>
-                <span className="bg-accent text-background px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2">
+                {tag && (
+                    <div className="flex items-center gap-3 mb-6 justify-center animate-in fade-in slide-in-from-top-2">
+                        <span className="text-text-muted text-base">Active filter:</span>
+                        <span className="bg-accent text-background px-3 py-1 rounded-full text-sm font-bold flex items-center gap-2 shadow-md">
                     #{tag}
-                    <button onClick={clearTag} className="hover:text-red-700">✕</button>
+                            <button onClick={clearTag} className="hover:text-red-200 transition-colors">✕</button>
                 </span>
-            </div>
-        )}
-      </header>
+                    </div>
+                )}
+            </header>
 
-      <section>
-        {posts?.length === 0 ? (
-            <p className="text-center text-text-muted py-10">No posts found matching your criteria.</p>
-        ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts?.map((post) => (
-                <PostCard key={post.id} post={post} />
-            ))}
-            </div>
-        )}
-      </section>
-    </div>
-  );
+            <section>
+                {isLoading ? (
+                    <div className="flex h-64 items-center justify-center">
+                        <div className="text-center">
+                            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-secondary border-t-accent"></div>
+                            <p className="mt-4 text-text-muted">Searching...</p>
+                        </div>
+                    </div>
+                ) : isError ? (
+                    <div className="flex h-64 items-center justify-center">
+                        <div className="text-center">
+                            <h2 className="text-2xl font-bold text-red-500">
+                                Error loading posts
+                            </h2>
+                            <p className="mt-2 text-text-muted">
+                                {error instanceof Error ? error.message : "Please try again later"}
+                            </p>
+                        </div>
+                    </div>
+                ) : posts?.length === 0 ? (
+                    <div className="text-center py-16 bg-secondary/10 rounded-xl border border-secondary border-dashed">
+                        <p className="text-xl text-text mb-2">No posts found.</p>
+                        <p className="text-text-muted">
+                            Try adjusting your search or filter.
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                        {posts?.map((post) => (
+                            <PostCard key={post.id} post={post} />
+                        ))}
+                    </div>
+                )}
+            </section>
+        </div>
+    );
 }

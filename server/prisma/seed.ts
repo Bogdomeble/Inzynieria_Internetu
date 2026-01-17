@@ -64,9 +64,12 @@ async function main() {
       authorId: user.id,
       categoryId: catTech.id,
       featuredImage: 'https://picsum.photos/800/400',
-      // Łączymy tagi
       tags: {
-        connect: [{ id: tagReact.id }, { id: tagNest.id }, { id: tagCoding.id }],
+        connect: [
+          { id: tagReact.id },
+          { id: tagNest.id },
+          { id: tagCoding.id },
+        ],
       },
     },
   });

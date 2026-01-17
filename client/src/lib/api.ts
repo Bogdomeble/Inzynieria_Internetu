@@ -17,15 +17,6 @@ const api = axios.create({
     withCredentials: true,
 });
 
-// już nie potrzebne bo używamy ciasteczek
-
-// api.interceptors.request.use((config) => {
-//     const token = localStorage.getItem('token');
-//     if (token) {
-//         config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-// });
 
 // Posts API
 export const postsApi = {
@@ -128,3 +119,17 @@ export const authApi = {
 };
 
 export default api;
+
+export const uploadsApi = {
+    uploadImage: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const { data } = await api.post('/upload', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return data.url;
+    },
+};

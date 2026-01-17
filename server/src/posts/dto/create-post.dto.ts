@@ -7,7 +7,15 @@ import {
   IsUUID,
   MinLength,
   IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+class TagConnectDto {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
+}
 
 export class CreatePostDto {
   @IsString()
@@ -32,11 +40,10 @@ export class CreatePostDto {
   @IsOptional()
   published?: boolean;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   @IsOptional()
   featuredImage?: string;
 
-  //not needed yet
   @IsUUID()
   authorId: string;
 
@@ -45,6 +52,7 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true }) // Sprawdza czy każdy element tablicy to UUID
-  tags?: string[];
+  @ValidateNested({ each: true })
+  @Type(() => TagConnectDto)
+  tags?: TagConnectDto[];
 }
