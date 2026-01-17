@@ -40,7 +40,7 @@ export class CreatePostDto {
   @IsOptional()
   published?: boolean;
 
-  @IsUrl()
+  @IsUrl({ require_tld: false })
   @IsOptional()
   featuredImage?: string;
 
