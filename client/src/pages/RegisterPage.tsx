@@ -25,68 +25,80 @@ export function RegisterPage() {
     };
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-            <div className="w-full max-w-md rounded-lg bg-card p-8 shadow-lg border border-secondary">
-                <h2 className="mb-6 text-center text-2xl font-bold text-text">
-                    Create Account
-                </h2>
+        <div className="flex min-h-[80vh] items-center justify-center px-4">
+            <div className="w-full max-w-md rounded-2xl bg-secondary/30 p-8 shadow-2xl border border-secondary backdrop-blur-sm">
+                <div className="mb-8 text-center">
+                    <h2 className="text-3xl font-black text-foreground tracking-tight">
+                        Create Account
+                    </h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Join our community today
+                    </p>
+                </div>
 
                 {error && (
-                    <div className="mb-4 rounded bg-red-900/50 p-3 text-sm text-red-200">
+                    <div className="mb-6 rounded-lg bg-red-900/20 border border-red-900/50 p-4 text-sm text-red-200 text-center">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-text-muted">
+                        <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Username
                         </label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="mt-1 block w-full rounded-md border border-secondary bg-primary px-3 py-2 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="johndoe"
+                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
                             required
                             minLength={3}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-text-muted">
+                        <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Email
                         </label>
                         <input
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full rounded-md border border-secondary bg-primary px-3 py-2 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="name@example.com"
+                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
                             required
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-text-muted">
+                        <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Password
                         </label>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="mt-1 block w-full rounded-md border border-secondary bg-primary px-3 py-2 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                            placeholder="Min. 6 characters"
+                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
                             required
                             minLength={6}
                         />
                     </div>
+
                     <button
                         type="submit"
-                        className="w-full rounded-md bg-accent px-4 py-2 text-background font-medium hover:bg-accent/90 transition-colors"
+                        className="w-full rounded-xl bg-accent px-4 py-3.5 text-sm font-bold text-accent-foreground hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 mt-2"
                     >
                         Sign Up
                     </button>
                 </form>
 
-                <p className="mt-4 text-center text-sm text-text-muted">
+                <p className="mt-8 text-center text-sm text-muted-foreground">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-accent hover:underline">
+                    <Link
+                        to="/login"
+                        className="font-bold text-accent hover:text-accent/80 hover:underline transition-colors"
+                    >
                         Login here
                     </Link>
                 </p>

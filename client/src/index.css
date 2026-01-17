@@ -4,35 +4,31 @@
 
 @layer base {
     :root {
-        /* Kolory podstawowe (Ciemny brąz/fiolet) */
-        --primary: 51 40 44;
-        --primary-foreground: 207 172 183;
+        --primary: 171 189 171;
+        --primary-foreground: 6 8 6;
 
-        /* Tło (Bardzo ciemne) */
-        --background: 13 8 10;
-        --foreground: 246 239 241; /* Jasny tekst domyślnie */
+        --background: 6 8 6;
+        --foreground: 234 239 234; /* --text */
 
-        /* Karty */
-        --card: 22 14 15; /* Rozjaśniamy lekko tło kart */
-        --card-foreground: 246 239 241;
+        --card-foreground: 234 239 234;
 
-        /* Elementy drugoplanowe */
-        --secondary: 40 30 35; /* Jaśniejszy od tła, żeby było widać różnicę */
-        --secondary-foreground: 207 172 183;
+        --secondary: 35 45 42;
+        --secondary-foreground: 234 239 234; /* Taki sam jak --text */
 
-        --muted: 22 14 15;
-        --muted-foreground: 156 163 175;
+        --muted: 35 45 42;
+        --muted-foreground: 125 153 148;
 
-        /* Akcent (Złoty) */
-        --accent: 178 152 122;
-        --accent-foreground: 13 8 10; /* Ciemny tekst na złotym tle dla kontrastu */
+        --accent: 125 153 148;
+        --accent-foreground: 6 8 6;
 
-        --text: 246 239 241;
-        --text-muted: 156 163 175;
+        --text: 234 239 234;
 
-        /* Błędy */
-        --destructive: 127 29 29;
-        --destructive-foreground: 254 226 226;
+        --border: 35 45 42;
+        --input: 35 45 42;
+
+        --ring: 125 153 148;
+
+        --radius: 0.5rem;
     }
 
     body {
@@ -45,19 +41,16 @@
         @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
     }
 
-    /* Ulepszone style przycisków */
     .btn {
         @apply inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-bold transition-all
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-background
         disabled:pointer-events-none disabled:opacity-50 active:scale-95;
     }
 
-    /* Przycisk Główny (Złoty z ciemnym tekstem) */
     .btn-primary {
         @apply bg-accent text-accent-foreground hover:bg-accent/90 shadow-md;
     }
 
-    /* Globalne style dla inputów i textarea */
     input,
     textarea,
     select {
@@ -65,14 +58,12 @@
         focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none transition-colors;
     }
 
-    /* Poprawa widoczności placeholderów */
     input::placeholder,
     textarea::placeholder {
         @apply text-text-muted/70;
     }
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
