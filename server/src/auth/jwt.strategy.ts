@@ -15,11 +15,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'AWARYJNY_KLUCZ_JWT_1111',
+      secretOrKey:
+        configService.get<string>('JWT_SECRET') || 'AWARYJNY_KLUCZ_JWT_1111',
     });
   }
 
-  async validate(payload: any) {
+  validate(payload: any) {
     return {
       userId: payload.sub,
       username: payload.username,
