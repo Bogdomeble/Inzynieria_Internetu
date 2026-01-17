@@ -5,10 +5,9 @@ import {
   Body,
   Param,
   Delete,
-  Put,
   UseGuards,
-  Request,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -25,20 +24,14 @@ export class PostsController {
     return this.postsService.create(createPostDto);
   }
 
-@Get() // Może zepsuć testy na postmanie
+  @Get()
   findAll(@Query('search') search?: string, @Query('tag') tag?: string) {
     return this.postsService.findAll({ search, tag });
   }
 
-  // Matches client api.getBySlug
   @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.postsService.findBySlug(slug);
-  }
-
-  @Get(':id/comments')
-  getComments(@Param('id') id: string) {
-    return this.postsService.getComments(id);
   }
 
   @Get(':id')
@@ -47,13 +40,19 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Patch(':id') // Zmieniłem na Patch, bo używasz PartialType w DTO
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postsService.update(id, updatePostDto);
   }
+
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(id);
+  }
+
+  @Get(':id/comments')
+  getComments(@Param('id') id: string) {
+    return this.postsService.getComments(id);
   }
 }

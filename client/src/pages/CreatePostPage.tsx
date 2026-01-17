@@ -4,6 +4,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { postsApi, categoriesApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { createSlug } from '../lib/utils';
+import { TagSelector } from '../components/TagSelector';
 
 export function CreatePostPage() {
     const navigate = useNavigate();
@@ -12,8 +13,8 @@ export function CreatePostPage() {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [categoryId, setCategoryId] = useState('');
+    const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-    // Pobierz kategorie do selecta
     const { data: categories } = useQuery({
         queryKey: ['categories'],
         queryFn: categoriesApi.getAll,
@@ -29,6 +30,12 @@ export function CreatePostPage() {
         },
     });
 
+    const handleTagsChange = (tags: string[]) => {
+        if (tags.length <= 3) {
+            setSelectedTags(tags);
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!user || !categoryId) {
@@ -39,10 +46,11 @@ export function CreatePostPage() {
         createPostMutation.mutate({
             title,
             content,
-            slug: createSlug(title) + '-' + Date.now().toString().slice(-4), // Unikalny slug
+            slug: createSlug(title) + '-' + Date.now().toString().slice(-4),
             authorId: user.id,
             categoryId: categoryId,
-            published: true, // Domyślnie publikujemy
+            published: true,
+            tags: selectedTags.map(id => ({ id })) as any,
         });
     };
 
@@ -56,6 +64,7 @@ export function CreatePostPage() {
                 onSubmit={handleSubmit}
                 className="space-y-6 bg-card p-6 rounded-lg border border-secondary"
             >
+                {/* Tytuł */}
                 <div>
                     <label className="block text-sm font-medium text-text-muted mb-1">
                         Title
@@ -70,6 +79,7 @@ export function CreatePostPage() {
                     />
                 </div>
 
+                {/* Kategoria */}
                 <div>
                     <label className="block text-sm font-medium text-text-muted mb-1">
                         Category
@@ -89,6 +99,29 @@ export function CreatePostPage() {
                     </select>
                 </div>
 
+                {/* TAGI */}
+                <div>
+                    <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium text-text-muted">
+                            Tags
+                        </label>
+                        <span className={`text-xs ${selectedTags.length === 3 ? 'text-accent' : 'text-text-muted'}`}>
+                            Selected: {selectedTags.length}/3
+                        </span>
+                    </div>
+
+                    <div className="p-4 rounded-md border border-secondary bg-primary/50">
+                        <TagSelector
+                            selectedTags={selectedTags}
+                            onChange={handleTagsChange}
+                        />
+                    </div>
+                    <p className="mt-1 text-xs text-text-muted">
+                        Click to select tags. Maximum 3 tags allowed.
+                    </p>
+                </div>
+
+                {/* Treść */}
                 <div>
                     <label className="block text-sm font-medium text-text-muted mb-1">
                         Content
@@ -102,6 +135,7 @@ export function CreatePostPage() {
                     />
                 </div>
 
+                {/* Przyciski */}
                 <div className="flex justify-end gap-4">
                     <button
                         type="button"

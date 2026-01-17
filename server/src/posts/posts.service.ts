@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma.service';
-import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
@@ -15,14 +13,14 @@ export class PostsService {
     return this.prisma.post.create({
       data: {
         ...postData,
-        tags: tags
+        tags: tags?.length
           ? {
-              connect: tags.map((tagId) => ({ id: tagId })),
+              connect: tags,
             }
           : undefined,
       },
       include: {
-        tags: true,
+        tags: true, // Zwracamy tagi
         category: true,
         author: { select: { id: true, username: true, email: true } },
       },
@@ -33,34 +31,47 @@ export class PostsService {
     const { search, tag } = query || {};
 
     const where: any = {
-      published: true, // tylko opublikowane na liście (dobra praktyka)
+      published: true,
     };
 
     if (search) {
-      where.OR = [
-        { title: { contains: search } }, 
-        { content: { contains: search } },
+      where.AND = [
+        {
+          OR: [
+            { title: { contains: search } },
+            { content: { contains: search } },
+          ],
+        },
       ];
     }
 
+    // Filtrowanie po tagu
     if (tag) {
-      where.tags = {
-        some: {
-          slug: tag, // Filtrujemy posty, które mają conajmniej 1 tag o danym slugu
+      const tagCondition = {
+        tags: {
+          some: {
+            slug: tag,
+          },
         },
       };
+
+      if (where.AND) {
+        where.AND.push(tagCondition);
+      } else {
+        where.AND = [tagCondition];
+      }
     }
 
     return this.prisma.post.findMany({
-      where, // Przekazujemy dynamiczny warunek
+      where,
       include: {
-        category: true,
         tags: true,
-        author: {
-          select: { id: true, username: true, email: true },
-        },
+        category: true,
+        author: { select: { id: true, username: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -69,13 +80,18 @@ export class PostsService {
       where: { slug },
       include: {
         category: true,
+        tags: true,
         author: {
           select: { id: true, username: true },
+        },
+        comments: {
+          include: { user: { select: { id: true, username: true } } },
+          orderBy: { createdAt: 'desc' },
         },
       },
     });
     if (!post) {
-      throw new NotFoundException(`Post with ID ${slug} not found`);
+      throw new NotFoundException(`Post with slug ${slug} not found`);
     }
     return post;
   }
@@ -100,7 +116,7 @@ export class PostsService {
   async update(id: string, updatePostDto: UpdatePostDto) {
     const { tags, ...postData } = updatePostDto;
 
-    await this.findOne(id);
+    await this.findOne(id); // Sprawdź czy post istnieje
 
     return this.prisma.post.update({
       where: { id },
@@ -109,12 +125,12 @@ export class PostsService {
         ...(tags
           ? {
               tags: {
-                set: tags.map((tagId) => ({ id: tagId })),
+                set: tags,
               },
             }
           : {}),
       },
-      include: { tags: true },
+      include: { tags: true, category: true },
     });
   }
 
@@ -128,10 +144,10 @@ export class PostsService {
       where: { postId },
       include: {
         user: {
-          select: { username: true },
+          select: { id: true, username: true },
         },
       },
-      orderBy: { createdAt: 'desc' }, // Najnowsze na górze
+      orderBy: { createdAt: 'desc' },
     });
   }
 }
