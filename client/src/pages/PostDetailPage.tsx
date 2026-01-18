@@ -5,6 +5,7 @@ import type { Post } from '../lib/schemas';
 import { formatDate } from '../lib/utils';
 import { postsApi, commentsApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import {LinkifiedText} from "../components/LinkifiedText.tsx";
 
 interface Comment {
     id: string;
@@ -175,8 +176,8 @@ export function PostDetailPage() {
 
             {/* Content */}
             <article className="prose prose-invert prose-lg max-w-none mb-16 text-foreground/90 leading-relaxed">
-                <div className="whitespace-pre-wrap">
-                    {post.content}
+                <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">
+                    <LinkifiedText text={post.content} />
                 </div>
             </article>
 
