@@ -2,25 +2,60 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../lib/api';
+import { InputError } from '../components/InputError';
+import { z } from 'zod';
+
+const registerSchema = z.object({
+    email: z.string().email('Niepoprawny format adresu e-mail'),
+    username: z.string().min(3, 'Nazwa użytkownika musi mieć min. 3 znaki'),
+    password: z.string().min(6, 'Hasło musi mieć co najmniej 6 znaków'),
+});
 
 export function RegisterPage() {
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+
+    // error - dla ogólnych błędów (np. błąd serwera)
     const [error, setError] = useState('');
+    // fieldErrors - dla konkretnych pól (email, username, password)
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
     const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setFieldErrors({});
+
+        const validation = registerSchema.safeParse({ email, username, password });
+
+        if (!validation.success) {
+            const formattedErrors: Record<string, string> = {};
+            validation.error.issues.forEach((issue) => {
+                formattedErrors[issue.path[0]] = issue.message;
+            });
+            setFieldErrors(formattedErrors);
+            return; // Przerywamy, nie wysyłamy żądania do API
+        }
 
         try {
             const data = await authApi.register({ email, username, password });
             login(data.user);
             navigate('/');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Registration failed');
+            // 2. Obsługa błędów z BACKENDU
+            if (err.response?.status === 409) {
+                // Jeśli e-mail jest zajęty (ConflictException w NestJS)
+                setFieldErrors({ email: 'Użytkownik o tym adresie e-mail już istnieje' });
+            } else if (err.response?.status === 400) {
+                // Obsługa błędów walidacji z NestJS (ValidationPipe)
+                const backendMsg = err.response.data.message;
+                setError(Array.isArray(backendMsg) ? backendMsg[0] : backendMsg);
+            } else {
+                setError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
+            }
         }
     };
 
@@ -43,6 +78,7 @@ export function RegisterPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Username Field */}
                     <div>
                         <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Username
@@ -52,11 +88,16 @@ export function RegisterPage() {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="johndoe"
-                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                            required
-                            minLength={3}
+                            className={`w-full rounded-xl border px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-all ${
+                                fieldErrors.username
+                                    ? 'border-red-500/50 bg-red-500/5 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-secondary bg-secondary/50 focus:border-accent focus:ring-accent'
+                            }`}
                         />
+                        <InputError message={fieldErrors.username} />
                     </div>
+
+                    {/* Email Field */}
                     <div>
                         <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Email
@@ -66,10 +107,16 @@ export function RegisterPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="name@example.com"
-                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                            required
+                            className={`w-full rounded-xl border px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-all ${
+                                fieldErrors.email
+                                    ? 'border-red-500/50 bg-red-500/5 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-secondary bg-secondary/50 focus:border-accent focus:ring-accent'
+                            }`}
                         />
+                        <InputError message={fieldErrors.email} />
                     </div>
+
+                    {/* Password Field */}
                     <div>
                         <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Password
@@ -79,10 +126,13 @@ export function RegisterPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Min. 6 characters"
-                            className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                            required
-                            minLength={6}
+                            className={`w-full rounded-xl border px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-all ${
+                                fieldErrors.password
+                                    ? 'border-red-500/50 bg-red-500/5 focus:border-red-500 focus:ring-red-500'
+                                    : 'border-secondary bg-secondary/50 focus:border-accent focus:ring-accent'
+                            }`}
                         />
+                        <InputError message={fieldErrors.password} />
                     </div>
 
                     <button

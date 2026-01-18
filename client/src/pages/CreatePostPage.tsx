@@ -6,6 +6,15 @@ import { useAuth } from '../context/AuthContext';
 import { createSlug } from '../lib/utils';
 import { TagSelector } from '../components/TagSelector';
 import { ImageUpload } from '../components/ImageUpload';
+import { InputError } from '../components/InputError';
+import { z } from 'zod';
+
+const postValidationSchema = z.object({
+    title: z.string().min(5, 'Tytuł musi mieć co najmniej 5 znaków'),
+    content: z.string().min(10, 'Treść musi mieć co najmniej 10 znaków'),
+    categoryId: z.string().uuid('Wybierz kategorię z listy'),
+    featuredImage: z.string().url('To nie jest poprawny adres URL').optional().or(z.literal('')),
+});
 
 export function CreatePostPage() {
     const navigate = useNavigate();
@@ -16,6 +25,8 @@ export function CreatePostPage() {
     const [categoryId, setCategoryId] = useState('');
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [featuredImage, setFeaturedImage] = useState('');
+
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     const { data: categories } = useQuery({
         queryKey: ['categories'],
@@ -28,7 +39,12 @@ export function CreatePostPage() {
             navigate(`/posts/${newPost.slug}`);
         },
         onError: (error: any) => {
-            alert(error.response?.data?.message || 'Failed to create post');
+            const message = error.response?.data?.message;
+            if (Array.isArray(message)) {
+                alert(message[0]);
+            } else {
+                alert(message || 'Failed to create post');
+            }
         },
     });
 
@@ -38,10 +54,26 @@ export function CreatePostPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!user || !categoryId) {
-            alert('Please select a category');
+        setFieldErrors({});
+
+        //Walidacja Zodem
+        const validation = postValidationSchema.safeParse({
+            title,
+            content,
+            categoryId,
+            featuredImage
+        });
+
+        if (!validation.success) {
+            const formattedErrors: Record<string, string> = {};
+            validation.error.issues.forEach((issue) => {
+                formattedErrors[issue.path[0]] = issue.message;
+            });
+            setFieldErrors(formattedErrors);
             return;
         }
+
+        if (!user) return;
 
         createPostMutation.mutate({
             title,
@@ -61,6 +93,8 @@ export function CreatePostPage() {
                 Create New Post
             </h1>
 
+            [Image of a blog post creation form with validation errors]
+
             <form
                 onSubmit={handleSubmit}
                 className="space-y-8 bg-secondary/20 p-8 rounded-2xl border border-secondary shadow-xl backdrop-blur-sm"
@@ -69,6 +103,7 @@ export function CreatePostPage() {
                     value={featuredImage}
                     onChange={setFeaturedImage}
                 />
+                <InputError message={fieldErrors.featuredImage} />
 
                 {/* Tytuł */}
                 <div>
@@ -80,10 +115,11 @@ export function CreatePostPage() {
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Enter an engaging title..."
-                        className="w-full rounded-xl border border-secondary bg-secondary px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                        required
-                        minLength={5}
+                        className={`w-full rounded-xl border px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-all ${
+                            fieldErrors.title ? 'border-red-500/50 bg-red-500/5 focus:ring-red-500' : 'border-secondary bg-secondary focus:ring-accent'
+                        }`}
                     />
+                    <InputError message={fieldErrors.title} />
                 </div>
 
                 {/* Kategoria */}
@@ -95,21 +131,22 @@ export function CreatePostPage() {
                         <select
                             value={categoryId}
                             onChange={(e) => setCategoryId(e.target.value)}
-                            className="w-full appearance-none rounded-xl border border-secondary bg-secondary px-4 py-3 text-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all cursor-pointer"
-                            required
+                            className={`w-full appearance-none rounded-xl border px-4 py-3 text-foreground focus:outline-none focus:ring-1 transition-all cursor-pointer ${
+                                fieldErrors.categoryId ? 'border-red-500/50 bg-red-500/5 focus:ring-red-500' : 'border-secondary bg-secondary focus:ring-accent'
+                            }`}
                         >
-                            <option value="" className="text-muted-foreground bg-background">Select a category</option>
+                            <option value="" className="bg-background text-muted-foreground">Select a category</option>
                             {categories?.map((cat: any) => (
                                 <option key={cat.id} value={cat.id} className="bg-background">
                                     {cat.name}
                                 </option>
                             ))}
                         </select>
-                        {/* Strzałka w dół dla selecta */}
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-muted-foreground">
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                     </div>
+                    <InputError message={fieldErrors.categoryId} />
                 </div>
 
                 {/* Tagi */}
@@ -125,9 +162,6 @@ export function CreatePostPage() {
                     <div className="p-4 rounded-xl border border-secondary bg-secondary/30">
                         <TagSelector selectedTags={selectedTags} onChange={handleTagsChange} />
                     </div>
-                    <p className="mt-2 text-xs text-muted-foreground ml-1">
-                        Select up to 3 tags related to your post.
-                    </p>
                 </div>
 
                 {/* Treść */}
@@ -139,10 +173,11 @@ export function CreatePostPage() {
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
                         placeholder="Write your story here..."
-                        className="w-full rounded-xl border border-secondary bg-secondary px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all h-64 resize-y leading-relaxed"
-                        required
-                        minLength={10}
+                        className={`w-full rounded-xl border px-4 py-3 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 transition-all h-64 resize-y leading-relaxed ${
+                            fieldErrors.content ? 'border-red-500/50 bg-red-500/5 focus:ring-red-500' : 'border-secondary bg-secondary focus:ring-accent'
+                        }`}
                     />
+                    <InputError message={fieldErrors.content} />
                 </div>
 
                 {/* Przyciski */}
@@ -159,9 +194,7 @@ export function CreatePostPage() {
                         disabled={createPostMutation.isPending}
                         className="rounded-xl bg-accent px-8 py-3 text-sm font-bold text-accent-foreground hover:opacity-90 hover:shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     >
-                        {createPostMutation.isPending
-                            ? 'Publishing...'
-                            : 'Publish Post'}
+                        {createPostMutation.isPending ? 'Publishing...' : 'Publish Post'}
                     </button>
                 </div>
             </form>
