@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { PrismaService } from '../prisma.service';
@@ -44,8 +44,21 @@ export class CommentsService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+async remove(id: string, userId: string, userRole: string) {
+    // sprawdzenie komentarza
+    const comment = await this.prisma.comment.findUnique({
+      where: { id },
+    });
+
+    if (!comment) {
+      throw new NotFoundException(`Comment ${id} not found`);
+    }
+
+    // sprawdzenie uprawnienia
+    if (comment.userId !== userId && userRole !== 'ADMIN') {
+      throw new ForbiddenException('You can only delete your own comments');
+    }
+
     return this.prisma.comment.delete({ where: { id } });
   }
 }

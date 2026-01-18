@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PrismaService } from '../prisma.service';
@@ -134,8 +134,14 @@ export class PostsService {
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+async remove(id: string, userId: string, userRole: string) {
+    const post = await this.findOne(id); // błąd, jeśli post nie istnieje
+
+    // Właściciel LUB Admin może usuwać posty
+    if (post.authorId !== userId && userRole !== 'ADMIN') {
+      throw new ForbiddenException('You are not allowed to delete this post');
+    }
+
     return this.prisma.post.delete({ where: { id } });
   }
 

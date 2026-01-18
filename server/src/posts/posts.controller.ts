@@ -8,6 +8,8 @@ import {
   UseGuards,
   Query,
   Patch,
+  Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -47,8 +49,8 @@ export class PostsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    return this.postsService.remove(id, req.user.userId, req.user.role);
   }
 
   @Get(':id/comments')

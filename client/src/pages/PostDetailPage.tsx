@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { Post } from '../lib/schemas';
@@ -16,6 +16,7 @@ interface Comment {
 
 export function PostDetailPage() {
     const { slug } = useParams<{ slug: string }>();
+    const navigate = useNavigate();
     const [newComment, setNewComment] = useState('');
     const { user } = useAuth();
     const queryClient = useQueryClient();
@@ -47,6 +48,36 @@ export function PostDetailPage() {
         },
     });
 
+    const deletePostMutation = useMutation({
+        mutationFn: postsApi.delete,
+        onSuccess: () => {
+            alert('Post deleted successfully');
+            navigate('/'); // Wróć na stronę główną
+        },
+        onError: (err) => alert('Failed to delete post'),
+    });
+
+    const deleteCommentMutation = useMutation({
+        mutationFn: commentsApi.delete,
+        onSuccess: () => {
+            // Odśwież tylko komentarze, nie całą stronę
+            queryClient.invalidateQueries({ queryKey: ['comments', post?.id] });
+        },
+        onError: (err) => alert('Failed to delete comment'),
+    });
+
+    const handleDeletePost = () => {
+        if (window.confirm('Are you sure you want to delete this post?')) {
+            if (post) deletePostMutation.mutate(post.id);
+        }
+    };
+
+    const handleDeleteComment = (commentId: string) => {
+        if (window.confirm('Delete this comment?')) {
+            deleteCommentMutation.mutate(commentId);
+        }
+    };
+
     const handleSubmitComment = (e: React.FormEvent) => {
         e.preventDefault();
         if (!newComment.trim() || !post || !user) return;
@@ -57,6 +88,8 @@ export function PostDetailPage() {
             userId: user.id,
         });
     };
+
+    const isPostAuthor = user && post && (user.id === post.authorId || user.role === 'ADMIN');
 
     if (isLoading) {
         return (
@@ -87,13 +120,28 @@ export function PostDetailPage() {
 
     return (
         <div className="mx-auto max-w-4xl px-4 py-8">
-            <Link
-                to="/"
-                className="group mb-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-foreground border border-secondary hover:bg-secondary hover:text-foreground transition-all duration-300"
-            >
-                <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Blog
-            </Link>
+            {/* Top Navigation */}
+            <div className="flex justify-between items-center mb-8">
+                <Link
+                    to="/"
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium text-foreground border border-secondary hover:bg-secondary hover:text-foreground transition-all duration-300"
+                >
+                    <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Blog
+                </Link>
 
+                {/* delete post button */}
+                {isPostAuthor && (
+                    <button
+                        onClick={handleDeletePost}
+                        disabled={deletePostMutation.isPending}
+                        className="rounded-md border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-bold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-50"
+                    >
+                        {deletePostMutation.isPending ? 'Deleting...' : 'Delete Post'}
+                    </button>
+                )}
+            </div>
+
+            {/* Featured Image */}
             {post.featuredImage && (
                 <div className="mb-10 overflow-hidden rounded-2xl border border-secondary/50">
                     <img
@@ -104,10 +152,11 @@ export function PostDetailPage() {
                 </div>
             )}
 
+            {/* Header */}
             <header className="mb-10 text-center">
                 {post.category && (
                     <div className="mb-4 flex justify-center">
-                         <span className="rounded-full border border-accent/50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent">
+                        <span className="rounded-full border border-accent/50 px-3 py-1 text-xs font-bold uppercase tracking-widest text-accent">
                             {post.category.name}
                         </span>
                     </div>
@@ -120,24 +169,26 @@ export function PostDetailPage() {
                         {formatDate(post.createdAt)}
                     </time>
                     <span>•</span>
-                    <span className="font-medium">By {post.author.username}</span>
+                    <span className="font-medium">By {post.author?.username}</span>
                 </div>
             </header>
 
+            {/* Content */}
             <article className="prose prose-invert prose-lg max-w-none mb-16 text-foreground/90 leading-relaxed">
                 <div className="whitespace-pre-wrap">
                     {post.content}
                 </div>
             </article>
 
+            {/* Comments Section */}
             <section className="mt-16 border-t border-secondary pt-12">
                 <h2 className="mb-8 text-3xl font-bold text-foreground flex items-center gap-3">
                     Comments <span className="text-lg text-muted-foreground font-normal">({comments.length})</span>
                 </h2>
 
+                {/* Comment Form */}
                 {user ? (
                     <form onSubmit={handleSubmitComment} className="mb-12 bg-secondary/20 p-6 rounded-xl border border-secondary">
-                        {/* ZMIANA: Input ma tło secondary i jasny tekst */}
                         <textarea
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
@@ -164,26 +215,44 @@ export function PostDetailPage() {
                     </div>
                 )}
 
+                {/* Comments List */}
                 <div className="space-y-6">
                     {comments.length === 0 ? (
                         <p className="text-muted-foreground text-center py-8 italic">No comments yet. Be the first to share your thoughts!</p>
                     ) : (
-                        comments.map((comment) => (
-                            <div
-                                key={comment.id}
-                                className="rounded-xl bg-secondary/30 p-6 border border-secondary"
-                            >
-                                <div className="mb-3 flex items-center justify-between">
-                                    <span className="font-bold text-foreground">
-                                        {(comment as any).user?.username || 'User'}
-                                    </span>
-                                    <time className="text-xs text-muted-foreground">
-                                        {formatDate(comment.createdAt)}
-                                    </time>
+                        comments.map((comment) => {
+                            const isCommentAuthor = user && (user.id === comment.userId || user.role === 'ADMIN');
+
+                            return (
+                                <div
+                                    key={comment.id}
+                                    className="rounded-xl bg-secondary/30 p-6 border border-secondary group relative"
+                                >
+                                    <div className="mb-3 flex items-center justify-between">
+                                        <span className="font-bold text-foreground">
+                                            {comment.user?.username || 'User'}
+                                        </span>
+                                        <div className="flex items-center gap-3">
+                                            <time className="text-xs text-muted-foreground">
+                                                {formatDate(comment.createdAt)}
+                                            </time>
+                                            
+                                            {/* delete comment button */}
+                                            {isCommentAuthor && (
+                                                <button
+                                                    onClick={() => handleDeleteComment(comment.id)}
+                                                    className="text-xs text-red-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-red-300 hover:underline"
+                                                    title="Delete comment"
+                                                >
+                                                    Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="text-foreground/90 leading-relaxed">{comment.content}</p>
                                 </div>
-                                <p className="text-foreground/90 leading-relaxed">{comment.content}</p>
-                            </div>
-                        ))
+                            );
+                        })
                     )}
                 </div>
             </section>

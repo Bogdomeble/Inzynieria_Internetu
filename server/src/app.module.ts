@@ -9,6 +9,7 @@ import { TagsModule } from './tags/tags.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaService } from './prisma.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PrismaService } from './prisma.service';
     TagsModule,
     UploadsModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    ScheduleModule.forRoot(),
 
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
