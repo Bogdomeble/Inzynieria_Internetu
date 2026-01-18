@@ -32,11 +32,11 @@ export function truncateText(text: string, length: number) {
  */
 export function createSlug(text: string) {
   return text
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Remove consecutive hyphens
-    .trim();
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-");
 }
 
 /**
