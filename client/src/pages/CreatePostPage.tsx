@@ -93,8 +93,6 @@ export function CreatePostPage() {
                 Create New Post
             </h1>
 
-            [Image of a blog post creation form with validation errors]
-
             <form
                 onSubmit={handleSubmit}
                 className="space-y-8 bg-secondary/20 p-8 rounded-2xl border border-secondary shadow-xl backdrop-blur-sm"
