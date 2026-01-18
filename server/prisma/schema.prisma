@@ -63,7 +63,7 @@ model Comment {
   postId String
   post   Post   @relation(fields: [postId], references: [id])
 
-  parentId String? // For nested comments if you implement them
+  parentId String? // dla zagnieżdżonych komentarzy
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,7 +73,7 @@ model Tag {
   id        String   @id @default(uuid())
   name      String
   slug      String   @unique
-  posts     Post[] // implicit many-to-many relation
+  posts     Post[] // wiele do wielu
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
