@@ -1,4 +1,3 @@
-// client/src/components/ImageUpload.tsx
 import { useState, useCallback } from 'react';
 import { uploadsApi } from '../lib/api';
 
