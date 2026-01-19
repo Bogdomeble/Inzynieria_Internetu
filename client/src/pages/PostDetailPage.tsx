@@ -1,3 +1,4 @@
+// client/src/pages/PostDetailPage.tsx
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -5,14 +6,17 @@ import type { Post } from '../lib/schemas';
 import { formatDate } from '../lib/utils';
 import { postsApi, commentsApi } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
-import {LinkifiedText} from "../components/LinkifiedText.tsx";
+import { LinkifiedText } from "../components/LinkifiedText";
 
-interface Comment {
+// Poprawiony interfejs zgodny z backendem (user zamiast author)
+interface CommentWithUser {
     id: string;
-    author: string;
     content: string;
     createdAt: string;
-    likes: number;
+    userId: string;
+    user?: {
+        username: string;
+    };
 }
 
 export function PostDetailPage() {
@@ -29,11 +33,13 @@ export function PostDetailPage() {
         retry: 1,
     });
 
-    const { data: comments = [] } = useQuery<Comment[]>({
+    // Jawne rzutowanie typu odpowiedzi
+    const { data: comments = [] } = useQuery<CommentWithUser[]>({
         queryKey: ['comments', post?.id],
-        queryFn: () => {
-            if (!post) return Promise.resolve([]);
-            return commentsApi.getByPostId(post.id);
+        queryFn: async () => {
+            if (!post) return [];
+            const data = await commentsApi.getByPostId(post.id);
+            return data as unknown as CommentWithUser[];
         },
         enabled: !!post,
     });
@@ -44,8 +50,8 @@ export function PostDetailPage() {
             setNewComment('');
             queryClient.invalidateQueries({ queryKey: ['comments', post?.id] });
         },
-        onError: (err) => {
-            alert('Failed to add comment: ' + err);
+        onError: () => {
+            alert('Failed to add comment');
         },
     });
 
@@ -53,23 +59,22 @@ export function PostDetailPage() {
         mutationFn: postsApi.delete,
         onSuccess: () => {
             alert('Post deleted successfully');
-            navigate('/'); // Wróć na stronę główną
+            navigate('/');
         },
-        onError: (err) => alert('Failed to delete post'),
+        onError: () => alert('Failed to delete post'),
     });
 
     const deleteCommentMutation = useMutation({
         mutationFn: commentsApi.delete,
         onSuccess: () => {
-            // Odśwież tylko komentarze, nie całą stronę
             queryClient.invalidateQueries({ queryKey: ['comments', post?.id] });
         },
-        onError: (err) => alert('Failed to delete comment'),
+        onError: () => alert('Failed to delete comment'),
     });
 
     const handleDeletePost = () => {
-        if (window.confirm('Are you sure you want to delete this post?')) {
-            if (post) deletePostMutation.mutate(post.id);
+        if (post && window.confirm('Are you sure you want to delete this post?')) {
+             deletePostMutation.mutate(post.id);
         }
     };
 
@@ -121,7 +126,6 @@ export function PostDetailPage() {
 
     return (
         <div className="mx-auto max-w-4xl px-4 py-8">
-            {/* Top Navigation */}
             <div className="flex justify-between items-center mb-8">
                 <Link
                     to="/"
@@ -130,7 +134,6 @@ export function PostDetailPage() {
                     <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Blog
                 </Link>
 
-                {/* delete post button */}
                 {isPostAuthor && (
                     <button
                         onClick={handleDeletePost}
@@ -142,7 +145,6 @@ export function PostDetailPage() {
                 )}
             </div>
 
-            {/* Featured Image */}
             {post.featuredImage && (
                 <div className="mb-10 overflow-hidden rounded-2xl border border-secondary/50">
                     <img
@@ -153,7 +155,6 @@ export function PostDetailPage() {
                 </div>
             )}
 
-            {/* Header */}
             <header className="mb-10 text-center">
                 {post.category && (
                     <div className="mb-4 flex justify-center">
@@ -174,20 +175,17 @@ export function PostDetailPage() {
                 </div>
             </header>
 
-            {/* Content */}
             <article className="prose prose-invert prose-lg max-w-none mb-16 text-foreground/90 leading-relaxed">
                 <div className="whitespace-pre-wrap leading-relaxed text-foreground/90">
-                    <LinkifiedText text={post.content} />
+                     <LinkifiedText text={post.content} />
                 </div>
             </article>
 
-            {/* Comments Section */}
             <section className="mt-16 border-t border-secondary pt-12">
                 <h2 className="mb-8 text-3xl font-bold text-foreground flex items-center gap-3">
                     Comments <span className="text-lg text-muted-foreground font-normal">({comments.length})</span>
                 </h2>
 
-                {/* Comment Form */}
                 {user ? (
                     <form onSubmit={handleSubmitComment} className="mb-12 bg-secondary/20 p-6 rounded-xl border border-secondary">
                         <textarea
@@ -216,12 +214,11 @@ export function PostDetailPage() {
                     </div>
                 )}
 
-                {/* Comments List */}
                 <div className="space-y-6">
                     {comments.length === 0 ? (
                         <p className="text-muted-foreground text-center py-8 italic">No comments yet. Be the first to share your thoughts!</p>
                     ) : (
-                        comments.map((comment) => {
+                        comments.map((comment: CommentWithUser) => {
                             const isCommentAuthor = user && (user.id === comment.userId || user.role === 'ADMIN');
 
                             return (
@@ -238,7 +235,6 @@ export function PostDetailPage() {
                                                 {formatDate(comment.createdAt)}
                                             </time>
                                             
-                                            {/* delete comment button */}
                                             {isCommentAuthor && (
                                                 <button
                                                     onClick={() => handleDeleteComment(comment.id)}

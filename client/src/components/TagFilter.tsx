@@ -33,7 +33,7 @@ export function TagFilter() {
 
     return (
         <div className="mb-8 overflow-x-auto pb-2">
-            <div className="flex gap-2 min-w-max">
+            <div className="flex gap-2 min-w-max justify-center">
                 {/* Przycisk "Wszystkie" */}
                 <button
                     onClick={() => handleTagClick(null)}

@@ -12,8 +12,8 @@ export class CleanupService {
   constructor(private prisma: PrismaService) {}
 
   // Uruchamiaj codziennie o 4:00 rano
-  @Cron(CronExpression.EVERY_DAY_AT_4AM)
-// @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_DAY_AT_4AM)
+@Cron(CronExpression.EVERY_10_MINUTES)
   async handleCron() {
     this.logger.debug('Running orphan file cleanup...');
 
@@ -60,13 +60,13 @@ export class CleanupService {
         }
 
         // --- ZABEZPIECZENIE (GRACE PERIOD) ---
-        // Jeśli obraz jest młodszy niż 1 godzina, NIE usuwaj go.
+        // Jeśli obraz jest młodszy niż 10 minut, NIE usuwamy go.
         const stats = fs.statSync(filePath);
         const now = new Date().getTime();
         const fileAgeInMs = now - stats.mtime.getTime();
-        const oneHourInMs = 60 * 60 * 1000;
+        const gradePeriodInMs = 60 * 60 * 1000;
 
-        if (fileAgeInMs < oneHourInMs) {
+        if (fileAgeInMs < gradePeriodInMs) {
           continue;
         }
 

@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
-  "scripts": {
-    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-    "build": "tsc"
-  },
+"scripts": {
+  "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+  "build": "concurrently \"npm run build --prefix client\" \"npm run build --prefix server\"",
+  "prod": "concurrently \"npm run prod --prefix client\" \"npm run prod --prefix server\""
+},
   "dependencies": {
     "dotenv": "^17.2.3"
   },
