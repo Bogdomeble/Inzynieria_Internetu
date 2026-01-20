@@ -54,12 +54,12 @@ export class CleanupService {
 
         const filePath = path.join(this.uploadDir, file);
 
-        // Jeśli plik JEST w bazie, zostaw go
+        // Jeśli plik jest w bazie, zostaw go
         if (activeFilenames.has(file)) {
           continue;
         }
 
-        // --- ZABEZPIECZENIE (GRACE PERIOD) ---
+        
         // Jeśli obraz jest młodszy niż 10 minut, NIE usuwamy go.
         const stats = fs.statSync(filePath);
         const now = new Date().getTime();

@@ -37,7 +37,7 @@ export function RegisterPage() {
                 formattedErrors[issue.path[0]] = issue.message;
             });
             setFieldErrors(formattedErrors);
-            return; // Przerywamy, nie wysyłamy żądania do API
+            return; // Przerywamy, brak żądania do API
         }
 
         try {
@@ -45,7 +45,7 @@ export function RegisterPage() {
             login(data.user);
             navigate('/');
         } catch (err: any) {
-            // 2. Obsługa błędów z BACKENDU
+            // Obsługa błędów z BACKENDU
             if (err.response?.status === 409) {
                 // Jeśli e-mail jest zajęty (ConflictException w NestJS)
                 setFieldErrors({ email: 'Użytkownik o tym adresie e-mail już istnieje' });

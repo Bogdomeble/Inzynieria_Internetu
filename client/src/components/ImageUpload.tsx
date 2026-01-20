@@ -14,13 +14,13 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
     const processFile = async (file: File) => {
         if (!file) return;
 
-        // 1. Walidacja typu
+        // Walidacja typu
         if (!file.type.startsWith('image/')) {
             alert('Please select an image file');
             return;
         }
 
-        // 2. Walidacja rozmiaru (np. max 5MB)
+        // Walidacja rozmiaru (np. max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             alert('File is too large (max 5MB)');
             return;

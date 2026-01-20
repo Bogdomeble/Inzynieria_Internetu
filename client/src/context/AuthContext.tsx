@@ -37,7 +37,7 @@ const checkAuth = async () => {
         // Jeśli ciasteczko HttpOnly istnieje i jest poprawne, dostaniemy usera.
         const userData = await authApi.getProfile();
         
-        // Mapowanie danych jeśli backend zwraca userId zamiast id (zależy od strategii)
+        // Mapowanie danych jeśli backend zwraca userId zamiast id
         const normalizedUser = {
             ...userData,
             id: userData.id || userData.userId 
@@ -45,8 +45,11 @@ const checkAuth = async () => {
         
         setUser(normalizedUser);
       } catch (error) {
-        // Jeśli błąd (401 Unauthorized), znaczy że nie jesteśmy zalogowani
+
+        // (401 Unauthorized), znaczy że nie jesteśmy zalogowani
+
         // lub token wygasł. Czyścimy usera.
+
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -70,7 +73,7 @@ const login = (newUser: User) => {
                         setUser(null);
 
         } finally {
-            // Czyścimy stan frontendu niezależnie od wyniku backendu
+            // czyścimy frontend niezależnie od wyniku backendu
             // dodatkowo czyscimy dane query
         window.location.reload();
         }
@@ -79,7 +82,6 @@ const login = (newUser: User) => {
 return (
     <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, isLoading }}>
       {isLoading ? (
-          // ZMIANA: Dodano style inline, aby upewnić się, że tekst będzie widoczny
           <div style={{ 
               height: '100vh', 
               display: 'flex', 

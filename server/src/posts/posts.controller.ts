@@ -42,7 +42,7 @@ export class PostsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id') // Zmieniłem na Patch, bo używasz PartialType w DTO
+  @Patch(':id') // Patch, gdyż używamy PartialType<> tutaj
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postsService.update(id, updatePostDto);
   }
