@@ -1,4 +1,3 @@
-// client/src/pages/PostDetailPage.tsx
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';

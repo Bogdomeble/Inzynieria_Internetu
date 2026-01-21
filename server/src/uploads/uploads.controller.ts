@@ -34,7 +34,7 @@ export class UploadsController {
   )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('File is not provided');
+      throw new BadRequestException('Error processing image');
     }
 
     // Generujemy nazwę pliku z rozszerzeniem .webp
@@ -49,7 +49,7 @@ export class UploadsController {
       await sharp(file.buffer)
         .resize({
           width: 1200, //  max 1200px
-          withoutEnlargement: true, // Nie powiększamy małych obrazków
+          //withoutEnlargement: true, // Nie powiększamy małych obrazków
         })
         .webp({ quality: 80 }) // Kompresja do WebP (80% jakości)
         .toFile(filePath);
