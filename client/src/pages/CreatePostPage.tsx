@@ -10,10 +10,10 @@ import { InputError } from '../components/InputError';
 import { z } from 'zod';
 
 const postValidationSchema = z.object({
-    title: z.string().min(5, 'Tytuł musi mieć co najmniej 5 znaków'),
-    content: z.string().min(10, 'Treść musi mieć co najmniej 10 znaków'),
-    categoryId: z.string().uuid('Wybierz kategorię z listy'),
-    featuredImage: z.string().url('To nie jest poprawny adres URL').optional().or(z.literal('')),
+    title: z.string().min(5, 'Title must be at least 5 characters long'),
+    content: z.string().min(10, 'Content must be at least 10 characters long'),
+    categoryId: z.string().uuid('Please select a category from the list'),
+    featuredImage: z.string().url('Invalid URL address').optional().or(z.literal('')),
 });
 
 export function CreatePostPage() {
