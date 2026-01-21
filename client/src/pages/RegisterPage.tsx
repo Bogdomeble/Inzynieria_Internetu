@@ -6,9 +6,9 @@ import { InputError } from '../components/InputError';
 import { z } from 'zod';
 
 const registerSchema = z.object({
-    email: z.string().email('Niepoprawny format adresu e-mail'),
-    username: z.string().min(3, 'Nazwa użytkownika musi mieć min. 3 znaki'),
-    password: z.string().min(6, 'Hasło musi mieć co najmniej 6 znaków'),
+    email: z.string().email('Invalid email address format'),
+    username: z.string().min(3, 'Username must be at least 3 characters long'),
+    password: z.string().min(6, 'Password must be at least 6 characters long'),
 });
 
 export function RegisterPage() {
@@ -34,7 +34,7 @@ export function RegisterPage() {
         if (!validation.success) {
             const formattedErrors: Record<string, string> = {};
             validation.error.issues.forEach((issue) => {
-                formattedErrors[issue.path[0]] = issue.message;
+                formattedErrors[issue.path[0] as string] = issue.message;
             });
             setFieldErrors(formattedErrors);
             return; // Przerywamy, brak żądania do API
@@ -45,16 +45,13 @@ export function RegisterPage() {
             login(data.user);
             navigate('/');
         } catch (err: any) {
-            // Obsługa błędów z BACKENDU
             if (err.response?.status === 409) {
-                // Jeśli e-mail jest zajęty (ConflictException w NestJS)
-                setFieldErrors({ email: 'Użytkownik o tym adresie e-mail już istnieje' });
+                setFieldErrors({ email: 'A user with this email address already exists' });
             } else if (err.response?.status === 400) {
-                // Obsługa błędów walidacji z NestJS (ValidationPipe)
                 const backendMsg = err.response.data.message;
                 setError(Array.isArray(backendMsg) ? backendMsg[0] : backendMsg);
             } else {
-                setError('Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
+                setError('An unexpected error occurred. Please try again.');
             }
         }
     };
@@ -72,13 +69,12 @@ export function RegisterPage() {
                 </div>
 
                 {error && (
-                    <div className="mb-6 rounded-lg bg-red-900/20 border border-red-900/50 p-4 text-sm text-red-200 text-center">
+                    <div className="mb-6 rounded-lg bg-red-900/20 border border-red-900/50 p-4 text-sm text-red-200 text-center animate-in fade-in slide-in-from-top-1">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Username Field */}
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                     <div>
                         <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Username

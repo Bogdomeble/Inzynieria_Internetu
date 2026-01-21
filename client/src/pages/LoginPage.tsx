@@ -10,9 +10,28 @@ export function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    const isValidEmail = (email: string) => {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (!email.trim() || !password.trim()) {
+            setError('All fields are required.');
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            setError('Please enter a valid email address.');
+            return;
+        }
+
+        if (password.length < 6) {
+            setError('Password is too short (minimum 6 characters).');
+            return;
+        }
 
         try {
             const data = await authApi.login({ email, password });
@@ -36,12 +55,12 @@ export function LoginPage() {
                 </div>
 
                 {error && (
-                    <div className="mb-6 rounded-lg bg-red-900/20 border border-red-900/50 p-4 text-sm text-red-200 text-center">
+                    <div className="mb-6 rounded-lg bg-red-900/20 border border-red-900/50 p-4 text-sm text-red-200 text-center animate-in fade-in slide-in-from-top-2">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
                     <div>
                         <label className="block text-sm font-bold text-muted-foreground mb-2 ml-1">
                             Email
@@ -52,7 +71,6 @@ export function LoginPage() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="name@example.com"
                             className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                            required
                         />
                     </div>
                     <div>
@@ -65,7 +83,6 @@ export function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="••••••••"
                             className="w-full rounded-xl border border-secondary bg-secondary/50 px-4 py-3 text-foreground placeholder-muted-foreground focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-all"
-                            required
                         />
                     </div>
 
