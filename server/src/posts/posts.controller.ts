@@ -9,6 +9,7 @@ import {
   Query,
   Patch,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
