@@ -32,11 +32,15 @@ export function truncateText(text: string, length: number) {
  */
 export function createSlug(text: string) {
   return text
+      .normalize("NFD")                // Rozbija znaki diakrytyczne (np. ą -> a + ogonek)
+      .replace(/[\u0300-\u036f]/g, "") // Usuwa znaki diakrytyczne
+      .replace(/ł/g, "l")
+      .replace(/Ł/g, "l")
       .trim()
       .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
+      .replace(/[^\w\s-]/g, "")        // Usuwa resztę znaków specjalnych
+      .replace(/\s+/g, "-")            // Zamienia spacje na myślniki
+      .replace(/-+/g, "-");            // Usuwa podwójne myślniki
 }
 
 /**

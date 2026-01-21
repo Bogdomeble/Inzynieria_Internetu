@@ -3,9 +3,16 @@ import { createSlug, formatDate, truncateText } from './utils';
 
 describe('Utils Logic', () => {
     describe('createSlug', () => {
+
         it('powinien zamienić tekst na URL-friendly slug', () => {
-            const input = 'Moja Pierwsza Przygoda z Reactem!';
-            const output = 'moja-pierwsza-przygoda-z-reactem';
+            const input = 'Kurrrrna, co to bylo?! Moze to ten slynny Laserowy Gniew Dzidy?';
+            const output = 'kurrrrna-co-to-bylo-moze-to-ten-slynny-laserowy-gniew-dzidy';
+
+            expect(createSlug(input)).toBe(output);
+        });
+        it('powinien zamienić polski tekst z znakami polskimi na URL-friendly slug', () => {
+            const input = 'Średnia hawajska dla każdego!';
+            const output = 'srednia-hawajska-dla-kazdego';
             expect(createSlug(input)).toBe(output);
         });
 
