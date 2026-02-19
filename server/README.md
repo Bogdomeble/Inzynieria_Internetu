@@ -1,4 +1,3 @@
-Inżynieria-Internetu/projekt-zaliczeniowy-ii-2025-_w_sensie_ze_tutaj_mam_nazwe_wpisac/server/README.md
 # Backend – Blog
 
 Backend aplikacji blogowej oparty o NestJS (Node.js, TypeScript).

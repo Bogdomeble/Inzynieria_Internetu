@@ -1,4 +1,3 @@
-Inżynieria-Internetu/projekt-zaliczeniowy-ii-2025-_w_sensie_ze_tutaj_mam_nazwe_wpisac/client/README.md
 # Frontend – Blog
 
 Aplikacja frontendowa bloga oparta o React, Vite i TypeScript.
